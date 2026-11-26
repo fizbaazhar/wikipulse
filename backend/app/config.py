@@ -76,6 +76,8 @@ class Settings:
     session_secret: Optional[str] = None  # None = random per process
     session_hours: float = 12.0
     cookie_secure: bool = False  # set true when served over HTTPS
+    # Built dashboard to serve from the back end (single-service deploys); None = don't.
+    static_dir: Optional[Path] = None
 
     @property
     def ai_problem(self) -> Optional[str]:
@@ -148,4 +150,5 @@ class Settings:
             session_secret=env.get("WIKIPULSE_SESSION_SECRET") or None,
             session_hours=float(env.get("WIKIPULSE_SESSION_HOURS", "12")),
             cookie_secure=_bool(env.get("WIKIPULSE_COOKIE_SECURE", "false")),
+            static_dir=Path(env["WIKIPULSE_STATIC_DIR"]) if env.get("WIKIPULSE_STATIC_DIR") else None,
         )

@@ -38,6 +38,12 @@ refuse requests without a session. With no password, login is off.
 **Docker:** `docker compose up --build`, then open http://localhost:8080
 (add `WIKIPULSE_SOURCE=replay` in front for the recorded sample).
 
+**Deploy (Render):** the root `Dockerfile` builds one image with the back end
+and the dashboard (the back end serves it when `WIKIPULSE_STATIC_DIR` is set),
+so the page, API and WebSocket share one origin. In Render, choose New →
+Blueprint and pick this repo: `render.yaml` sets everything except the secrets,
+which Render asks for (login password, Azure key, endpoint and deployment).
+
 **Tests:** `make test` (back end + front end) and `make e2e` (browser test).
 Run `make help` to see every command.
 
@@ -76,8 +82,9 @@ npm run e2e        # or npm run e2e:open for the Cypress app
 | Extra: login | `backend/app/auth.py`, `LoginPage.tsx`, `useAuth.ts` | One account from `.env`; signed HttpOnly SameSite=Strict session cookie; `/api` and `/ws` closed without it; failed logins throttled |
 | Extra: AI assistant | `backend/app/ai/assistant.py`, `AssistantChat.tsx`, `useAssistant.ts` | Chat panel ("Ask AI") that streams answers ChatGPT-style (NDJSON over fetch, Stop button) from the live dashboard data, in the user's language; declines questions that are not about the dashboard in one line; public text sent as escaped JSON; has its own hourly limit (30 calls, so background vandalism review cannot starve it) and shares the daily budget; falls back to answers from the numbers when AI is unavailable |
 | Extra: guided tour | `frontend/src/features/tour/` | 15-step walkthrough that spotlights each section on first sign-in; replay from the **?** button; keyboard (arrows / Esc) and mobile bottom-sheet support |
-| Tests | `backend/tests`, `frontend/src/**/*.test.*`, `frontend/cypress/e2e` | 217 back end, 71 front end, 29 end-to-end |
+| Tests | `backend/tests`, `frontend/src/**/*.test.*`, `frontend/cypress/e2e` | 231 back end, 71 front end, 29 end-to-end |
 | Optional: Docker | `docker-compose.yml` | nginx serves the dashboard and proxies `/api` and `/ws` |
+| Optional: deployed demo | `Dockerfile`, `render.yaml` | One Render web service; the back end serves the built dashboard |
 | Optional: E2E UI test | `frontend/cypress/e2e/*.cy.ts` | Cypress (reason below) |
 
 **Starter files:** the brief asks to start from `LiveFeed.tsx` and
@@ -120,6 +127,7 @@ backend/
     pipeline.py         source -> parser -> dedupe -> stats -> moderator
     vandalism.py        rule-based signals and score
     hub.py              per-second fan-out to WebSocket clients
+    web.py              serves the built dashboard when WIKIPULSE_STATIC_DIR is set
     ai/
       llm.py            Azure OpenAI / OpenAI / Claude clients, hourly rate limiter
       budget.py         daily dollar limit (reserves worst case, records real cost)
@@ -354,7 +362,7 @@ tests headless, so `make e2e` is a single command locally or in CI.
    fits here) with a queue between them, so several API instances can serve
    clients.
 6. **Pulse per wiki**, cached per filter, plus links from the summary to the pages.
-7. CI pipeline running `make test` and `make e2e`, and a deployed demo.
+7. CI pipeline running `make test` and `make e2e` on every pull request.
 
 ## Known limitations
 
@@ -398,3 +406,4 @@ All settings are environment variables (or `backend/.env`):
 | `WIKIPULSE_SESSION_SECRET` | _(random per start)_ | Signs session cookies; set it so sessions survive restarts |
 | `WIKIPULSE_SESSION_HOURS` | `12` | How long a sign-in lasts |
 | `WIKIPULSE_COOKIE_SECURE` | `false` | `true` when served over HTTPS |
+| `WIKIPULSE_STATIC_DIR` | (unset) | Built dashboard folder for the back end to serve at `/` (single-service deploys) |
