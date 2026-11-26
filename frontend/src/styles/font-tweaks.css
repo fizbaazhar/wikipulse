@@ -1,0 +1,63 @@
+/* ------------------------------------------------------- Inter fit tweaks */
+/* Inter runs a little wider than Arial: tighten the uppercase tracking so
+   labels and card titles stay on one line. */
+.card-head h2 {
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+}
+.card-head > .muted {
+  white-space: nowrap;
+}
+.kpi {
+  padding: 2px 20px;
+}
+.kpi-label {
+  letter-spacing: 0.03em;
+}
+@media (max-width: 1420px) {
+  .kpi {
+    padding: 2px 13px;
+  }
+  .kpi-value {
+    font-size: 19px;
+  }
+}
+@media (max-width: 1180px) {
+  .kpi {
+    padding: 2px 8px;
+  }
+  .kpi-value {
+    font-size: 17px;
+  }
+  .kpi-label {
+    font-size: 9.5px;
+  }
+  .wiki-filter select {
+    min-width: 0;
+    width: 150px;
+  }
+}
+@media (max-width: 1100px) and (min-width: 761px) {
+  .kpi {
+    padding: 2px 4px;
+  }
+  .wiki-filter select {
+    width: 130px;
+  }
+}
+@media (max-width: 760px) {
+  .kpi {
+    padding: 5px 2px;
+  }
+  .kpi-value {
+    font-size: 15px;
+  }
+  /* Let the short labels wrap to two lines rather than cut to "EDIT…" */
+  .kpi-label {
+    font-size: 8.5px;
+    letter-spacing: 0;
+    line-height: 1.25;
+    white-space: normal;
+    text-overflow: clip;
+  }
+}

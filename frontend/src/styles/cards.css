@@ -1,0 +1,166 @@
+/* ----------------------------------------------------------------- cards */
+.card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: 22px 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface) 120px);
+  box-shadow: var(--shadow);
+}
+/* Panels in the fixed-height live row scroll inside themselves. */
+.feed-list,
+.flagged-list,
+.top-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+.card-head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.card-head h2 {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.card-head h2::before {
+  content: "";
+  width: 3px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--accent);
+  opacity: 0.8;
+}
+.btn-ghost {
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text);
+  cursor: pointer;
+}
+.btn-ghost:hover:not(:disabled) {
+  border-color: var(--muted);
+}
+.btn-ghost:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--ok-soft);
+  color: var(--ok);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.chip-ai {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.chip-bot {
+  margin-left: 6px;
+}
+.chip-new {
+  background: var(--info-soft);
+  color: var(--info);
+}
+.wiki-tag {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* ----------------------------------------------------------------- pulse */
+.pulse-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.pulse-headline {
+  margin-bottom: 6px;
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+.pulse-summary {
+  margin: 4px 0 14px;
+  color: var(--text-2);
+  font-size: 15px;
+  line-height: 1.65;
+  max-width: 75ch;
+}
+
+/* ------------------------------------------------------------- top pages */
+.top-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.top-item {
+  display: flex;
+  gap: 10px;
+}
+.top-rank {
+  width: 20px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.top-body {
+  flex: 1;
+  min-width: 0;
+}
+.top-line {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.top-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.top-count {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.top-bar-track {
+  height: 4px;
+  margin-top: 4px;
+  border-radius: 2px;
+  background: var(--surface-2);
+}
+.top-bar {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+}

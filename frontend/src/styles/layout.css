@@ -1,0 +1,60 @@
+/* ---------------------------------------------------------------- layout */
+.app {
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 0 32px 40px;
+}
+/* 12-column command-center grid. Row 2 has a fixed height so the feed,
+   top pages and vandalism panels line up and scroll inside themselves. */
+.board {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-areas:
+    "pulse pulse pulse pulse pulse heart heart heart heart heart heart heart"
+    "top top top top feed feed feed feed feed flags flags flags"
+    "minute minute minute minute minute sizes sizes sizes sizes wikis wikis wikis"
+    "minute minute minute minute minute editors editors editors editors wikis wikis wikis";
+  /* The live row fills the rest of the first screen (header + top row ≈ 380px). */
+  grid-template-rows: auto var(--live-row, clamp(500px, calc(100vh - 380px), 700px)) auto auto;
+  gap: 24px;
+  margin-top: 24px;
+}
+.pulse { grid-area: pulse; }
+.heartbeat { grid-area: heart; }
+.top-pages { grid-area: top; }
+.feed { grid-area: feed; }
+.flagged { grid-area: flags; }
+.chart { grid-area: minute; }
+.sizes { grid-area: sizes; }
+.editors { grid-area: editors; }
+.wikis { grid-area: wikis; }
+.footer {
+  margin-top: 20px;
+  text-align: center;
+}
+@media (max-width: 1280px) {
+  .board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "pulse heart"
+      "feed flags"
+      "top wikis"
+      "minute minute"
+      "sizes editors";
+    grid-template-rows: auto var(--live-row, 540px) auto auto auto;
+  }
+}
+@media (max-width: 760px) {
+  .app {
+    padding: 0 12px 20px;
+  }
+  .board {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "pulse" "heart" "flags" "top" "feed" "minute" "sizes" "editors" "wikis";
+    grid-template-rows: none;
+  }
+  .feed,
+  .flagged {
+    height: 520px;
+  }
+}

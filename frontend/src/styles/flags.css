@@ -1,0 +1,68 @@
+/* ----------------------------------------------------------------- flags */
+.flag {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.flag-flagged {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.flag-suspect {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.flag-reviewing {
+  background: var(--info-soft);
+  color: var(--info);
+}
+.flag-cleared {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.flag-src {
+  padding: 0 4px;
+  border-radius: 4px;
+  background: color-mix(in srgb, currentColor 18%, transparent);
+  font-size: 10px;
+}
+.flagged-item {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.flagged-item:last-child {
+  border-bottom: 0;
+}
+.flagged-cleared {
+  opacity: 0.65;
+}
+.flagged-top {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+.flagged-title {
+  display: block;
+  margin: 4px 0 2px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.flagged-reason {
+  color: var(--text-2);
+}
+.flagged-comment {
+  margin-top: 4px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-family: var(--mono);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
