@@ -4,6 +4,8 @@ import { defineConfig } from "cypress";
 // AI off) and the real dashboard. `npm run e2e` starts both on ports that
 // differ from the dev defaults, so the tests can run next to a dev session:
 // back end on 8001, dashboard on 5174 (see the e2e:* scripts in package.json).
+// The back end's rolling window is one hour there, so the replayed sample
+// stays on screen for a long run or an open Cypress window.
 export default defineConfig({
   e2e: {
     baseUrl: "http://localhost:5174",
