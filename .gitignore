@@ -22,8 +22,9 @@ dist/
 *.pdf
 
 # Front-end test output
-test-results/
-playwright-report/
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/
 
 # Local runtime state (AI spend counter)
 .state/

@@ -104,10 +104,32 @@ explanation. Most of the corrections below came from that habit.
   `/* section */` text is ignored by language rules, and percentage-based
   removal rules need at least 1,000 bytes removed. Each has a test.
 
+## 8. Moving the browser tests to Cypress, and a data problem nobody had listed (AI was wrong)
+
+- **What I asked:** replace the Playwright tests with Cypress, then make the
+  tests cover every feature, including the problems in the sample data.
+- **What I kept:** one spec per area (login, dashboard, assistant, tour, data
+  quality). The data-quality spec reads `sample_events.jsonl` itself, works
+  out what should survive (no broken JSON, no `log`/`categorize`, no untitled
+  events, no repeats) and checks the back end counters, the stats, the API and
+  the feed all agree.
+- **What went wrong:** the first data test identified events only by
+  `meta.id` and failed on one edit. That edit ("History of computing") has no
+  `meta` block at all, a problem missing from the list in section 1. The back
+  end already handled it (it falls back to `<wiki>:rc:<id>`); the AI's test did
+  not follow the parser's own rule. Separately, Cypress would not start at all
+  from the VS Code terminal: VS Code sets `ELECTRON_RUN_AS_NODE`, which turns
+  Cypress's Electron app into plain Node.
+- **What I changed:** the test now uses the parser's id rule, and a new test
+  checks the edit without `meta` reaches the dashboard. The `e2e` scripts clear
+  `ELECTRON_RUN_AS_NODE` themselves. I also learnt the test back end must be
+  fresh: after five minutes the replayed sample leaves the rolling window, so
+  a long-open Cypress window fails tests that pass on a new run.
+
 ## What I checked by hand
 
 - The AI path is tested with a fake model and a mocked HTTP API (which checks the
-  exact request sent to Claude). I will verify it with the real key before the demo.
+  exact request sent to Azure OpenAI). I will verify it with the real key before the demo.
 - The prompt-injection defences were reviewed line by line, not just
   generated: data escaping, schema validation, and the rule that the AI cannot
   clear an injection flag.

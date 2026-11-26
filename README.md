@@ -54,7 +54,7 @@ cd ../frontend
 npm install
 npm run dev
 npm test && npm run typecheck
-npx playwright install chromium && npm run e2e
+npm run e2e        # or npm run e2e:open for the Cypress app
 ```
 </details>
 
@@ -76,9 +76,9 @@ npx playwright install chromium && npm run e2e
 | Extra: login | `backend/app/auth.py`, `LoginPage.tsx`, `useAuth.ts` | One account from `.env`; signed HttpOnly SameSite=Strict session cookie; `/api` and `/ws` closed without it; failed logins throttled |
 | Extra: AI assistant | `backend/app/ai/assistant.py`, `AssistantChat.tsx`, `useAssistant.ts` | Chat panel ("Ask AI") that streams answers ChatGPT-style (NDJSON over fetch, Stop button) from the live dashboard data, in the user's language; declines questions that are not about the dashboard in one line; public text sent as escaped JSON; has its own hourly limit (30 calls, so background vandalism review cannot starve it) and shares the daily budget; falls back to answers from the numbers when AI is unavailable |
 | Extra: guided tour | `frontend/src/features/tour/` | 15-step walkthrough that spotlights each section on first sign-in; replay from the **?** button; keyboard (arrows / Esc) and mobile bottom-sheet support |
-| Tests | `backend/tests`, `frontend/src/**/*.test.*`, `frontend/e2e` | 217 back end, 71 front end, 6 end-to-end |
+| Tests | `backend/tests`, `frontend/src/**/*.test.*`, `frontend/cypress/e2e` | 217 back end, 71 front end, 29 end-to-end |
 | Optional: Docker | `docker-compose.yml` | nginx serves the dashboard and proxies `/api` and `/ws` |
-| Optional: E2E UI test | `frontend/e2e/dashboard.spec.ts` | Playwright (reason below) |
+| Optional: E2E UI test | `frontend/cypress/e2e/*.cy.ts` | Cypress (reason below) |
 
 **Starter files:** the brief asks to start from `LiveFeed.tsx` and
 `stream_client.py`. They were not in the materials I received, so I built the
@@ -145,7 +145,7 @@ frontend/
     features/profile/   account menu (avatar dropdown with Sign out)
     lib/                formatting, safeUrl, reduced-motion check
     styles/             CSS split by area, imported in order from index.css
-  e2e/                  Playwright test against the real back end
+  cypress/              Cypress end-to-end tests against the real back end
 ```
 
 The WebSocket message protocol is documented at the top of `backend/app/api/ws.py`.
@@ -313,15 +313,30 @@ I tested where bugs would be expensive or hard to see:
 - **WebSocket end to end:** the replay source drives the real app.
 - **Front end:** the reducer (de-duplication, pause, late AI verdicts), XSS
   rendering, `javascript:` links, and components.
-- **Browser E2E:** Playwright runs the real back end on the sample and the real
-  dashboard in Chromium. It checks trending, the feed, the wiki filter, and
-  that the planted XSS payloads are shown as text and never execute.
+- **Browser E2E:** Cypress runs the real back end on the sample (AI off) and the
+  real dashboard in a real browser, one spec per area:
+  - `auth.cy.ts`: closed routes and API without a session, wrong password,
+    sign in, reload, sign out, account menu, rate-limit and network errors.
+  - `dashboard.cy.ts`: header numbers, Pulse and Refresh, top pages, feed and
+    Pause, every chart (hover tooltip, screen-reader tables), flags, the wiki
+    filter from the menu and from the busiest wikis, dark theme, phone width,
+    and that the planted XSS payloads are shown as text and never execute.
+  - `assistant.cy.ts`: suggestions, answers from live data, panel questions,
+    off-topic questions declined, HTML shown as text, Clear, close and Escape.
+  - `tour.cy.ts`: first visit, every step, keyboard, replay from the ? button.
+  - `data-quality.cy.ts`: reads the sample itself, works out what should
+    survive, and checks the dashboard agrees: the broken JSON line, `log` and
+    `categorize` events, untitled events and repeats are skipped and counted
+    (`/api/health`), every accepted edit is counted once, the feed shows no
+    repeats or rejected events, and the edit with no `meta` block is kept.
 
-**Why Playwright, not Selenium with C#:** the dashboard is TypeScript, so the
-test lives in the same language and toolchain as the code it tests. It needs
-no .NET runtime or separate WebDriver. It auto-waits on assertions (fewer
-flaky sleeps for a live-updating UI) and starts both servers itself, so
-`make e2e` is a single command locally or in CI.
+**Why Cypress, not Selenium with C#:** the dashboard is TypeScript, so the
+tests live in the same language and toolchain as the code they test. They need
+no .NET runtime or separate WebDriver. Cypress retries every command and
+assertion until it passes or times out, so a live-updating UI needs no sleeps,
+and `npm run e2e:open` shows each step in the browser while you debug.
+`npm run e2e` starts both servers (via `start-server-and-test`) and runs the
+tests headless, so `make e2e` is a single command locally or in CI.
 
 ---
 

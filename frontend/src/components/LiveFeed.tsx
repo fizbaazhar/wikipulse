@@ -75,7 +75,7 @@ const FeedItem = memo(function FeedItem({ edit }: { edit: Edit }) {
   const deltaClass = edit.delta === null ? "" : edit.delta < 0 ? "delta-neg" : "delta-pos";
   const flagged = edit.flag && edit.flag.status !== "cleared";
   return (
-    <li className={`feed-item ${flagged ? "feed-item-flagged" : ""}`} data-wiki={edit.wiki}>
+    <li className={`feed-item ${flagged ? "feed-item-flagged" : ""}`} data-wiki={edit.wiki} data-id={edit.id}>
       <div className="feed-top">
         <time className="feed-time">{formatClock(edit.timestamp)}</time>
         <span className="wiki-tag">{wikiLabel(edit.wiki)}</span>
