@@ -1,0 +1,19 @@
+# Build context for the root Dockerfile. Never send secrets or local state.
+**/.env
+**/.env.*
+!**/.env.example
+.git
+*.pdf
+docs
+
+backend/.venv
+backend/.state
+backend/.pytest_cache
+backend/tests
+**/__pycache__
+
+frontend/node_modules
+frontend/dist
+frontend/cypress
+frontend/test-results
+**/*.tsbuildinfo
