@@ -7,10 +7,13 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p cypress",
     "test": "vitest run",
     "test:watch": "vitest",
-    "e2e": "playwright test"
+    "e2e:backend": "cd ../backend && WIKIPULSE_SOURCE=replay WIKIPULSE_REPLAY_SPEED=0 WIKIPULSE_REPLAY_LOOP=false WIKIPULSE_AI=off WIKIPULSE_PULSE_INTERVAL=1 WIKIPULSE_AUTH_USERNAME=e2e WIKIPULSE_AUTH_PASSWORD=e2e-password WIKIPULSE_SESSION_SECRET=e2e-only-secret .venv/bin/uvicorn --factory app.main:create_app --port 8001",
+    "e2e:frontend": "PORT=5174 WIKIPULSE_BACKEND_URL=http://localhost:8001 vite --strictPort",
+    "e2e": "start-server-and-test e2e:backend http-get://localhost:8001/api/health e2e:frontend http-get://localhost:5174 'env -u ELECTRON_RUN_AS_NODE cypress run'",
+    "e2e:open": "start-server-and-test e2e:backend http-get://localhost:8001/api/health e2e:frontend http-get://localhost:5174 'env -u ELECTRON_RUN_AS_NODE cypress open --e2e'"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.5",
@@ -18,7 +21,7 @@
     "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@playwright/test": "1.65.1",
+    "@testing-library/cypress": "10.1.3",
     "@testing-library/jest-dom": "8.0.0",
     "@testing-library/react": "16.3.3",
     "@testing-library/user-event": "14.6.13",
@@ -26,7 +29,9 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.3.0",
+    "cypress": "16.4.0",
     "jsdom": "31.0.1",
+    "start-server-and-test": "3.0.13",
     "typescript": "7.0.2",
     "vite": "8.3.8",
     "vitest": "5.1.1"

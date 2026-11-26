@@ -28,7 +28,7 @@ test-backend: ## Back-end tests (pytest)
 test-frontend: ## Front-end type check and tests (vitest)
 	cd frontend && npm run typecheck && npm test
 
-e2e: ## End-to-end browser test (Playwright; first run: cd frontend && npx playwright install chromium)
+e2e: ## End-to-end browser test (Cypress, against the real back end on the sample)
 	cd frontend && npm run e2e
 
 docker: ## Build and run everything with Docker on http://localhost:8080
