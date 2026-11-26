@@ -47,7 +47,8 @@ describe("Login and session", () => {
     cy.findByRole("button", { name: "Sign out" }).click();
     cy.findByRole("button", { name: "Sign in" }).should("be.visible");
     cy.location("pathname").should("eq", "/login");
-    // Signing out ends the session on the server too.
+    // Signing out clears the session cookie, so the API is closed again. (Sessions
+    // are stateless signed tokens: a copied token stays valid until it expires.)
     cy.request({ url: "/api/snapshot", failOnStatusCode: false }).its("status").should("eq", 401);
   });
 

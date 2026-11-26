@@ -1,6 +1,8 @@
 # --- build the static dashboard ---
 FROM node:22-alpine AS build
 WORKDIR /app
+# Cypress is a dev tool for the e2e tests; don't download its browser into the image.
+ENV CYPRESS_INSTALL_BINARY=0
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
