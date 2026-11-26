@@ -9,13 +9,10 @@ node_modules/
 dist/
 
 # Env / secrets (never commit the LLM API key)
-.env
-.env.*
 !.env.example
 
 # OS / editor
 .DS_Store
-.vscode/
 .idea/
 
 # The assessment brief is the client's document, not part of the project
@@ -31,3 +28,4 @@ cypress/downloads/
 
 # TypeScript incremental build cache
 *.tsbuildinfo
+config.bat

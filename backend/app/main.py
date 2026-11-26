@@ -25,6 +25,7 @@ from .hub import Hub
 from .pipeline import Pipeline
 from .sources import LiveSource, ReplaySource
 from .stats import RollingStats
+from .web import mount_dashboard
 
 log = logging.getLogger("wikipulse")
 
@@ -148,4 +149,6 @@ def create_app(
     app.state.settings, app.state.auth, app.state.login_throttle = settings, auth, LoginThrottle()
     for module in (session, data, ai, ws):
         app.include_router(module.router)
+    if settings.static_dir is not None:
+        mount_dashboard(app, settings.static_dir)  # last, so the API routes win
     return app

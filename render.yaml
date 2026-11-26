@@ -1,0 +1,35 @@
+# Render Blueprint: one web service built from the root Dockerfile.
+# In Render: New → Blueprint → pick this repo. Render asks for every value
+# marked `sync: false`; those are secrets and never live in the repo.
+services:
+  - type: web
+    name: wikipulse
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free # sleeps after 15 min without visitors; use "starter" for the demo day
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /api/health
+    envVars:
+      - key: WIKIPULSE_SOURCE
+        value: live
+      # Served over HTTPS, so the session cookie is Secure.
+      - key: WIKIPULSE_COOKIE_SECURE
+        value: "true"
+      # Login
+      - key: WIKIPULSE_AUTH_USERNAME
+        value: admin
+      - key: WIKIPULSE_AUTH_PASSWORD
+        sync: false
+      - key: WIKIPULSE_SESSION_SECRET
+        generateValue: true
+      # AI (Azure OpenAI). Leave the key empty for rules-only mode.
+      - key: AZURE_OPENAI_API_KEY
+        sync: false
+      - key: AZURE_OPENAI_ENDPOINT
+        sync: false
+      - key: AZURE_OPENAI_DEPLOYMENT
+        sync: false
+      - key: WIKIPULSE_LLM_DAILY_BUDGET_USD
+        value: "2"
