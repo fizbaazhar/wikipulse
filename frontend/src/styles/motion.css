@@ -1,0 +1,26 @@
+/* ---------------------------------------------------------------- motion */
+.feed-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.chip-waiting {
+  border: 0;
+  background: var(--accent-soft);
+  color: var(--accent);
+  cursor: pointer;
+}
+.feed-list {
+  overflow-anchor: auto; /* keep the reader's place when rows are added above */
+}
+.top-item {
+  will-change: transform;
+}
+.top-bar {
+  transition: width 500ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .top-bar {
+    transition: none;
+  }
+}
