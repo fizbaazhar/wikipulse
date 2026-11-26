@@ -129,7 +129,7 @@ explanation. Most of the corrections below came from that habit.
 ## What I checked by hand
 
 - The AI path is tested with a fake model and a mocked HTTP API (which checks the
-  exact request sent to Claude). I will verify it with the real key before the demo.
+  exact request sent to Azure OpenAI). I will verify it with the real key before the demo.
 - The prompt-injection defences were reviewed line by line, not just
   generated: data escaping, schema validation, and the rule that the AI cannot
   clear an injection flag.
