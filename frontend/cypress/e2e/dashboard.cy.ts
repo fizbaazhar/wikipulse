@@ -46,15 +46,18 @@ describe("WikiPulse dashboard (replaying the recorded sample)", () => {
     });
   });
 
-  it("shows the live feed and can pause it", () => {
+  it("shows the feed paused, can go live and pause again", () => {
     cy.get(".feed-item").its("length").should("be.greaterThan", 50);
     cy.get(".feed-item").first().within(() => {
       cy.get(".feed-time").invoke("text").should("match", /^\d{2}:\d{2}:\d{2}$/);
       cy.get(".feed-title").should("have.attr", "target", "_blank").and("have.attr", "href").and("match", /^https:\/\//);
     });
+    // Paused by default, with the countdown to the next catch-up.
+    cy.get(".feed-next").should("be.visible").invoke("text").should("match", /^Updates every 2 min · next in [0-2]:\d\d$/);
+    cy.findByRole("button", { name: "Go live" }).click();
+    cy.get(".feed-next").should("not.exist");
     cy.findByRole("button", { name: "Pause" }).click();
-    cy.findByRole("button", { name: /^Resume/ }).click();
-    cy.findByRole("button", { name: "Pause" }).should("be.visible");
+    cy.findByRole("button", { name: "Go live" }).should("be.visible");
   });
 
   it("draws every chart, with a hover tooltip and a screen-reader table", () => {

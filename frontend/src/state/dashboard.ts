@@ -17,6 +17,8 @@ export interface DashboardState {
   edits: Edit[];
   /** Edits that arrived while the feed was paused, newest first. */
   pending: Edit[];
+  /** The feed starts paused and catches up every couple of minutes (see
+   * `refreshFeed`); "Go live" makes it follow the stream edit by edit. */
   paused: boolean;
   /** Suspicious edits, newest first. */
   flagged: Edit[];
@@ -31,7 +33,9 @@ type Action =
   | { type: "connection"; status: ConnectionStatus }
   | { type: "message"; message: ServerMessage }
   | { type: "setWiki"; wiki: string | null }
-  | { type: "togglePause" };
+  | { type: "togglePause" }
+  /** While paused: show everything that arrived since, and stay paused. */
+  | { type: "refreshFeed" };
 
 export const initialState: DashboardState = {
   connection: "connecting",
@@ -40,7 +44,7 @@ export const initialState: DashboardState = {
   wiki: null,
   edits: [],
   pending: [],
-  paused: false,
+  paused: true,
   flagged: [],
   snapshot: null,
   pulse: null,
@@ -145,6 +149,15 @@ export function reducer(state: DashboardState, action: Action): DashboardState {
         };
       }
       return { ...state, paused: true };
+    case "refreshFeed":
+      if (!state.paused || state.pending.length === 0) return state;
+      return {
+        ...state,
+        edits: [...state.pending, ...state.edits].slice(0, MAX_FEED),
+        pending: [],
+        // A catch-up lands as one block, not trickled in edit by edit.
+        feedVersion: state.feedVersion + 1,
+      };
     default:
       return state;
   }

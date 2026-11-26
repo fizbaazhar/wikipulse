@@ -30,7 +30,10 @@ interface Props {
 }
 
 export function Dashboard({ theme, onToggleTheme, user, onLogout, onUnauthorized }: Props) {
-  const { state, setWiki, togglePause, refreshPulse } = useWikiPulse(undefined, onUnauthorized);
+  const { state, setWiki, togglePause, refreshFeed, nextFeedUpdate, refreshPulse } = useWikiPulse(
+    undefined,
+    onUnauthorized,
+  );
   const now = useNow();
   const tour = useTour();
   const { snapshot } = state;
@@ -70,6 +73,8 @@ export function Dashboard({ theme, onToggleTheme, user, onLogout, onUnauthorized
           paused={state.paused}
           pendingCount={state.pending.length}
           onTogglePause={togglePause}
+          onRefresh={refreshFeed}
+          nextUpdate={nextFeedUpdate}
         />
         <FlaggedEdits edits={state.flagged} ai={state.ai} />
         <EditsPerMinuteChart data={snapshot?.wiki_minutes ?? EMPTY_MINUTES} />

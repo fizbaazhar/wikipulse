@@ -52,8 +52,9 @@ _PANELS = (
     (("top 10", "top pages", "most edited"),
      "Top 10 pages lists the most edited pages in the last 5 minutes. A page shooting up there is often in the news."),
     (("live feed", "feed"),
-     "The live feed shows every edit as it arrives: page, wiki, editor and size change. Hover it or press Pause "
-     "to freeze it; new edits wait until you resume."),
+     "The live feed lists recent edits: page, wiki, editor and size change. It starts paused and catches up "
+     "every two minutes (or at once with the \"new\" button); press Go live to follow every edit as it "
+     "arrives, and Pause to stop again."),
     (("vandalism panel", "possible vandalism", "vandalism", "flagged"),
      "Possible vandalism lists edits that look suspicious, each with a reason. Rules catch them first, then AI "
      "reviews them and marks them likely (red), suspicious (amber) or cleared. The counts at the top of the panel "
