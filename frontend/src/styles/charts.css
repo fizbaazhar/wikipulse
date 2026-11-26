@@ -1,0 +1,268 @@
+/* ---------------------------------------------------------------- charts */
+.sr-only {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.card {
+  position: relative; /* anchors hidden tables and tooltips inside the card */
+}
+.chart-wrap {
+  position: relative;
+}
+.chart-svg {
+  overflow: visible;
+}
+.chart-grid {
+  stroke: var(--chart-grid);
+  stroke-width: 1;
+  stroke-dasharray: none;
+}
+.chart-axis {
+  stroke: var(--chart-axis);
+  stroke-width: 1;
+}
+.chart-label {
+  fill: var(--chart-ink);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.chart-value {
+  fill: var(--text);
+  font-size: 12px;
+  font-weight: 650;
+}
+.area-fill {
+  fill-opacity: 0.16;
+}
+.line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.end-dot {
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+.crosshair {
+  stroke: var(--chart-ink);
+  stroke-width: 1;
+}
+.hb-scroll {
+  animation: hb-scroll 1000ms linear;
+}
+@keyframes hb-scroll {
+  from {
+    transform: translateX(var(--shift));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.bar {
+  transition: opacity 150ms ease;
+}
+.stack-current .bar {
+  opacity: 0.55;
+}
+.stack-hover .bar {
+  opacity: 0.8;
+}
+
+/* legend */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  justify-content: flex-end;
+  color: var(--text-2);
+  font-size: 12px;
+}
+.legend-stacked {
+  justify-content: flex-start;
+  margin-top: 10px;
+}
+.legend-item {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  white-space: nowrap;
+}
+.legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+.legend-line {
+  width: 14px;
+  height: 2px;
+  border-radius: 1px;
+}
+
+/* tooltip */
+.chart-tooltip {
+  position: absolute;
+  z-index: 5;
+  min-width: 150px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 6px 20px rgba(16, 24, 40, 0.14);
+  font-size: 12px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.chart-tooltip-title {
+  margin-bottom: 4px;
+  color: var(--muted);
+}
+.chart-tooltip-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.chart-tooltip-row strong {
+  min-width: 2.5em;
+  font-variant-numeric: tabular-nums;
+}
+.chart-tooltip-row span:last-child {
+  color: var(--text-2);
+}
+.chart-tooltip-key {
+  width: 12px;
+  height: 2px;
+  border-radius: 1px;
+}
+
+/* tall segmented bar */
+.segbar {
+  display: flex;
+  gap: 2px;
+  height: 28px;
+}
+.segbar-part {
+  display: flex;
+  align-items: center;
+  min-width: 4px;
+  padding-left: 8px;
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 650;
+  transition: flex-grow 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.segbar-empty {
+  flex: 1;
+  border-radius: 4px;
+  background: var(--surface-2);
+}
+
+/* busiest wikis */
+.wiki-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.wiki-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(36px, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.wiki-bar:hover,
+.wiki-bar:focus-visible {
+  background: var(--surface-2);
+}
+.wiki-bar-name {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.wiki-bar-name .muted {
+  font-weight: 400;
+  font-size: 12px;
+}
+.wiki-bar-track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--surface-2);
+}
+.wiki-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--bar);
+  transition: width 500ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.wiki-bar-active .wiki-bar-fill,
+.wiki-bar:hover .wiki-bar-fill {
+  background: var(--accent);
+}
+.wiki-bar-active {
+  background: var(--accent-soft);
+}
+.wiki-bar-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  text-align: right;
+  white-space: nowrap;
+}
+.wiki-bar-value .muted {
+  font-weight: 400;
+  font-size: 12px;
+}
+
+/* sparklines + trend chip in top pages */
+.sparkline {
+  flex: none;
+}
+.sparkline-line {
+  fill: none;
+  stroke: var(--chart-ink);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.sparkline-dot {
+  fill: var(--accent);
+}
+.trend-chip {
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hb-scroll {
+    animation: none;
+  }
+  .segbar-part,
+  .wiki-bar-fill {
+    transition: none;
+  }
+}

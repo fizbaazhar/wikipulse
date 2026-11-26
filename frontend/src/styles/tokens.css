@@ -1,0 +1,120 @@
+/* ---------------------------------------------------------------- tokens */
+/* :root holds the dark palette and [data-theme="light"] the light one.
+   The app defaults to light: useTheme always sets data-theme on <html>.
+   Light palette: primary #4B49AC, supporting #7DA0FA / #7978E9 / #F3797E. */
+:root {
+  color-scheme: dark;
+  /* Dark: neutral graphite, flat surfaces, one muted blue accent. */
+  --bg: #09090b;
+  --bg-glow: none;
+  --surface: #111113;
+  --surface-2: #18181b;
+  --surface-3: #232327;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --text: #ededef;
+  --text-2: #a1a1aa;
+  --muted: #85858f;
+  --accent: #7aa7f5;
+  --accent-soft: rgba(122, 167, 245, 0.12);
+  --bar: #2a2a30;
+  --danger: #f2777c;
+  --danger-soft: rgba(242, 119, 124, 0.12);
+  --warn: #e5b454;
+  --warn-soft: rgba(229, 180, 84, 0.12);
+  --info: #7aa7f5;
+  --info-soft: rgba(122, 167, 245, 0.12);
+  --ok: #a1a1aa;
+  --ok-soft: rgba(161, 161, 170, 0.1);
+  --radius: 14px;
+  --shadow: none;
+  --header-bg: rgba(9, 9, 11, 0.88);
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: "Inter Variable", Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --display: var(--sans);
+  --glass: var(--surface);
+  --glass-edge: linear-gradient(var(--border), var(--border));
+  --neon: #7aa7f5;
+  --neon-2: #7aa7f5;
+  --neon-3: #7aa7f5;
+  --neon-4: #7aa7f5;
+  --glow: 0 0 0 3px rgba(122, 167, 245, 0.18);
+  --aurora-1: transparent;
+  --aurora-2: transparent;
+  --aurora-3: transparent;
+  --logo-bg: #ededef;
+  --logo-ink: #09090b;
+
+  /* Chart palette (validated with the dataviz script against #111113) */
+  --series-1: #3a9ad0; /* humans / registered */
+  --series-2: #6461d6; /* bots */
+  --series-3: #e15f69; /* logged out */
+  --series-other: #52525b;
+  --wiki-1: #6461d6;
+  --wiki-2: #e15f69;
+  --wiki-3: #3a9ad0;
+  --wiki-4: #b98000;
+  --wiki-5: #1a9c80;
+  --diverge-pos: #3a9ad0;
+  --diverge-neg: #e15f69;
+  --diverge-mid: #3f3f46;
+  --chart-grid: #1e1e22;
+  --chart-axis: #2e2e34;
+  --chart-ink: #85858f;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --logo-bg: #4b49ac;
+  --logo-ink: #ffffff;
+  --bg: #f5f7ff;
+  --bg-glow: none;
+  --surface: #ffffff;
+  --surface-2: #f5f6fd;
+  --surface-3: #eceefa;
+  --border: #e7e9f5;
+  --border-strong: #d6d9ee;
+  --text: #1f1f2e;
+  --text-2: #4a4c66;
+  --muted: #7a7c96;
+  --accent: #4b49ac;
+  --accent-soft: #ededfa;
+  --bar: #c9d6fb;
+  --danger: #d9474f;
+  --danger-soft: #fdedee;
+  --warn: #a86a00;
+  --warn-soft: #fff4de;
+  --info: #4b6fd8;
+  --info-soft: #eaf0ff;
+  --ok: #4a4c66;
+  --ok-soft: #eff0f7;
+  --shadow: 0 4px 18px rgba(75, 73, 172, 0.06);
+  --header-bg: rgba(255, 255, 255, 0.92);
+  --glass: #ffffff;
+  --glass-edge: linear-gradient(#e7e9f5, #e7e9f5);
+  --neon: #4b49ac;
+  --neon-2: #7da0fa;
+  --neon-3: #7978e9;
+  --neon-4: #f3797e;
+  --glow: 0 0 0 3px rgba(75, 73, 172, 0.12);
+  --aurora-1: transparent;
+  --aurora-2: transparent;
+  --aurora-3: transparent;
+
+  /* Chart palette (validated with the dataviz script, light) */
+  --series-1: #7da0fa;
+  --series-2: #4b49ac;
+  --series-3: #f3797e;
+  --series-other: #c6c8dc;
+  --wiki-1: #4b49ac;
+  --wiki-2: #f3797e;
+  --wiki-3: #7da0fa;
+  --wiki-4: #e3a008;
+  --wiki-5: #1f9e89;
+  --diverge-pos: #7da0fa;
+  --diverge-neg: #f3797e;
+  --diverge-mid: #c6c8dc;
+  --chart-grid: #eef0f8;
+  --chart-axis: #d6d9ee;
+  --chart-ink: #7a7c96;
+}

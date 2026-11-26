@@ -1,0 +1,63 @@
+/* ------------------------------------------------------------------ feed */
+.feed-list,
+.flagged-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.feed-item {
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--border);
+}
+.feed-item:last-child {
+  border-bottom: 0;
+}
+.feed-item-flagged {
+  border-left: 3px solid var(--danger);
+  padding-left: 8px;
+}
+.feed-top,
+.feed-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  align-items: baseline;
+}
+.feed-bottom {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.feed-time {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.feed-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.feed-delta {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.delta-pos {
+  color: var(--accent);
+}
+.delta-neg {
+  color: var(--danger);
+}
+.feed-user {
+  color: var(--text-2);
+}
+.feed-comment {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
