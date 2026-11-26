@@ -1,0 +1,23 @@
+# docker compose up --build   →   http://localhost:8080
+#
+# Put the Azure OpenAI settings (or another provider's key) in backend/.env to turn the AI features on.
+# WIKIPULSE_SOURCE=replay docker compose up   replays the recorded sample instead.
+services:
+  backend:
+    build: ./backend
+    env_file:
+      - path: ./backend/.env
+        required: false
+    environment:
+      WIKIPULSE_SOURCE: ${WIKIPULSE_SOURCE:-live}
+      WIKIPULSE_CORS_ORIGINS: http://localhost:8080
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
