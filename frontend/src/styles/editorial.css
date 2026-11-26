@@ -1,0 +1,726 @@
+/* ===================================================================
+   Editorial look: a front page, not a control panel.
+   - No boxes: each section starts under a heavy rule, items are split
+     by hairlines.
+   - Type carries the hierarchy: serif headlines, big tabular numbers,
+     small uppercase labels.
+   - One accent (ink blue). Red only means "possible vandalism".
+   Loaded last; works for both themes through the tokens.
+   =================================================================== */
+
+body {
+  background: var(--bg);
+}
+
+/* ------------------------------------------------------------ masthead */
+.header {
+  border-bottom: 3px double var(--rule);
+  background: var(--header-bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+.brand-mark {
+  width: 28px;
+  height: 28px;
+}
+.brand-mark rect {
+  rx: 2;
+}
+.brand h1 {
+  font-family: var(--serif);
+  font-size: 27px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.brand-sub {
+  margin-top: 3px;
+  color: var(--muted);
+  font-family: var(--serif);
+  font-size: 13px;
+  font-style: italic;
+}
+.status {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--text-2);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+.status-live {
+  color: var(--text);
+  background: none;
+}
+.status-live .status-dot {
+  background: var(--danger); /* the "on air" light */
+  animation: on-air 2s ease-in-out infinite;
+}
+@keyframes on-air {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* Key numbers: a row of figures split by hairlines, like a market table. */
+.kpis {
+  gap: 0;
+}
+.kpi {
+  padding: 0 18px;
+  border-left: 1px solid var(--border);
+  border-radius: 0;
+  background: none;
+}
+.kpi-value {
+  font-family: var(--sans);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.kpi-label {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+.kpi-alert {
+  background: none;
+}
+.kpi-alert .kpi-value {
+  color: var(--danger);
+}
+.kpi-bump .kpi-value {
+  animation: kpi-flash 900ms ease-out;
+}
+@keyframes kpi-flash {
+  0% {
+    opacity: 0.3;
+  }
+}
+
+/* Controls: square, quiet, no fills. */
+.wiki-filter select,
+.icon-btn,
+.btn-ghost {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  box-shadow: none;
+  transition: border-color 120ms ease;
+}
+.wiki-filter select:hover,
+.wiki-filter select:focus-visible,
+.icon-btn:hover,
+.btn-ghost:hover:not(:disabled) {
+  border-color: var(--text);
+  box-shadow: none;
+  outline: none;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.btn-ghost {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Wiki filter: our own chevron instead of the native arrow. */
+.wiki-filter {
+  position: relative;
+  display: inline-flex;
+}
+.wiki-filter select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 34px;
+  cursor: pointer;
+}
+.wiki-filter::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid var(--text);
+  border-bottom: 1.5px solid var(--text);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+.wiki-filter select option {
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* --------------------------------------------------------------- page */
+.board {
+  gap: 40px 36px;
+  margin-top: 28px;
+}
+
+/* A section: heavy rule on top, no box. */
+.card {
+  padding: 12px 0 0;
+  border: 0;
+  border-top: 2px solid var(--rule);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  animation: none;
+}
+.card::before,
+.card::after {
+  display: none;
+}
+.card-head {
+  margin-bottom: 16px;
+}
+.card-head h2 {
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+.card-head h2::before {
+  display: none;
+}
+.card-head .muted,
+.card-head .small {
+  font-size: 12px;
+}
+
+/* Chips and tags: small uppercase text, no pills. */
+.chip,
+.chip-ai,
+.chip-new,
+.wiki-tag,
+.trend-chip {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.chip-ai,
+.chip-new,
+.trend-chip {
+  color: var(--accent);
+}
+.chip-bot {
+  margin-left: 6px;
+}
+.chip-model {
+  margin-left: 0.35em;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* -------------------------------------------------------------- pulse */
+/* The lead story: a serif headline, then the standfirst. */
+.pulse-icon {
+  display: none;
+}
+.pulse-ai {
+  border-top-color: var(--accent);
+}
+.pulse-headline {
+  margin: 2px 0 12px;
+  background: none;
+  color: var(--text);
+  font-family: var(--serif);
+  font-size: 34px;
+  font-weight: 650;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  animation: none;
+  text-wrap: balance;
+  overflow-wrap: anywhere; /* page titles like "User:Name/Long_page.json" */
+}
+.pulse-summary {
+  color: var(--text-2);
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+/* ---------------------------------------------------------- top pages */
+.top-list {
+  gap: 0;
+}
+.top-item {
+  margin: 0;
+  padding: 7px 0;
+  border-radius: 0;
+}
+.top-item:first-child {
+  padding-top: 0;
+}
+.top-rank {
+  width: 22px;
+  color: var(--muted);
+  font-family: var(--serif);
+  font-size: 15px;
+  font-style: italic;
+}
+.top-item:nth-child(-n + 3) .top-rank {
+  color: var(--text);
+  font-weight: 700;
+}
+.top-title {
+  font-family: var(--serif);
+  font-size: 15.5px;
+  font-weight: 600;
+}
+.top-count,
+.wiki-bar-value {
+  font-family: var(--sans);
+  font-variant-numeric: tabular-nums;
+}
+.top-bar-track {
+  height: 2px;
+  margin-top: 6px;
+  border-radius: 0;
+  background: var(--surface-3);
+}
+.top-bar {
+  border-radius: 0;
+  background: var(--text-2);
+}
+.top-item:nth-child(-n + 3) .top-bar,
+.wiki-bar-active .wiki-bar-fill,
+.wiki-bar:hover .wiki-bar-fill {
+  background: var(--accent);
+}
+
+/* --------------------------------------------------------------- feed */
+.feed-controls {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+/* "Go live": the one filled button on the page, with the on-air light. */
+.btn-live {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  border-color: var(--text);
+  background: var(--text);
+  color: var(--bg);
+}
+.btn-live::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--danger);
+}
+.btn-live:hover:not(:disabled) {
+  background: var(--text-2);
+}
+.feed-next {
+  font-variant-numeric: tabular-nums;
+}
+.feed-item {
+  margin: 0;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.feed-item:hover {
+  background: none;
+}
+.feed-item:hover .feed-title {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.feed-item-flagged {
+  padding-left: 10px;
+  border-left: 2px solid var(--danger);
+  background: none;
+  box-shadow: none;
+}
+.feed-title {
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* ----------------------------------------------------------- vandalism */
+.flagged-list ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* Counts as figures, not tiles. */
+.flag-summary {
+  display: flex;
+  gap: 0;
+  margin: -4px 0 16px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+}
+.flag-count {
+  flex: 1;
+  padding: 0 0 0 14px;
+  border: 0;
+  border-left: 1px solid var(--border);
+  border-radius: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.flag-count:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+.flag-count strong {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  text-shadow: none;
+}
+.flag-count-flagged strong {
+  color: var(--danger);
+}
+.flag-count-suspect strong {
+  color: var(--warn);
+}
+.flag-count-cleared strong {
+  color: var(--text-2);
+}
+.flagged-open {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.flagged-open .flagged-item {
+  padding: 12px 0 12px 12px;
+  border: 0;
+  border-left: 2px solid var(--border-strong);
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  animation: none;
+}
+.flagged-open .flagged-flagged {
+  border-left-color: var(--danger);
+}
+.flagged-open .flagged-suspect {
+  border-left-color: var(--warn);
+}
+.flagged-open .flagged-reviewing {
+  border-left-color: var(--accent);
+}
+.flagged-title {
+  font-family: var(--serif);
+  font-size: 16px;
+}
+/* Status labels: coloured small caps, no pills. */
+.flag,
+.flag-flagged,
+.flag-suspect,
+.flag-reviewing,
+.flag-cleared {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.flag-src {
+  padding: 0 3px;
+  border: 1px solid currentColor;
+  border-radius: 0;
+  background: none;
+  font-size: 9px;
+}
+.flagged-reviewing .flag {
+  animation: on-air 1.6s ease-in-out infinite;
+}
+/* The edit summary is quoted, not boxed. Three lines, full text on hover. */
+.flagged-comment {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  margin-top: 6px;
+  padding: 0 0 0 10px;
+  border-left: 1px solid var(--border-strong);
+  border-radius: 0;
+  background: none;
+}
+.flagged-calm {
+  padding: 4px 0 8px;
+}
+.flagged-cleared-group {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.flagged-cleared-group summary {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 0;
+  color: var(--text-2);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+}
+.flagged-cleared-group summary::-webkit-details-marker {
+  display: none;
+}
+.flagged-cleared-group summary::before {
+  content: "›";
+  display: inline-block;
+  width: 10px;
+  transition: transform 150ms ease;
+}
+.flagged-cleared-group[open] summary::before {
+  transform: rotate(90deg);
+}
+.flagged-cleared-group .flagged-item {
+  padding: 8px 0;
+  opacity: 0.7;
+}
+.empty-state {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  color: var(--muted);
+}
+.empty-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  color: var(--text-2);
+}
+
+/* -------------------------------------------------------------- charts */
+.chart-tooltip {
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  background: var(--surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+.chart-value {
+  font-family: var(--sans);
+}
+
+/* ---------------------------------------------- assistant + account */
+.assistant-fab,
+.btn-primary,
+.assistant-send {
+  border-radius: var(--radius);
+  background: var(--text);
+  color: var(--bg);
+  box-shadow: none;
+}
+.assistant-fab:hover,
+.btn-primary:hover:not(:disabled) {
+  background: var(--text-2);
+  box-shadow: none;
+}
+.assistant {
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+.assistant-avatar,
+.user-avatar {
+  background: var(--text);
+  color: var(--bg);
+}
+.assistant-msg-user {
+  border-radius: 0;
+  background: var(--surface-2);
+  color: var(--text);
+}
+.assistant-msg-assistant {
+  border-radius: 0;
+  background: none;
+  border-left: 2px solid var(--rule);
+  padding-left: 12px;
+  font-family: var(--serif);
+  font-size: 15px;
+}
+.assistant-chip,
+.assistant-input textarea {
+  border-radius: var(--radius);
+}
+.assistant-input textarea:focus {
+  border-color: var(--text);
+  box-shadow: none;
+}
+.tour-dots > * {
+  border-radius: 0;
+}
+.tour-popover {
+  border-radius: 0;
+}
+
+/* ------------------------------------------------- tablet + small laptop */
+/* Below 1280px the five numbers no longer fit beside the name and controls:
+   they move to their own row, spread across the full width. */
+@media (max-width: 1280px) {
+  .header {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    gap: 12px 16px;
+  }
+  /* Row 1: name, status, controls on the right. Row 2: the numbers. */
+  .header-controls {
+    grid-row: 1;
+    grid-column: 3;
+    justify-self: end;
+  }
+  .kpis {
+    display: grid;
+    grid-row: 2;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    overflow: visible;
+  }
+  .kpi:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+/* Two columns: the feed header is narrow, so keep only "next in 1:23". */
+@media (min-width: 761px) and (max-width: 1000px) {
+  .feed-next-long {
+    display: none;
+  }
+}
+
+/* -------------------------------------------------------------- mobile */
+@media (max-width: 760px) {
+  .header {
+    gap: 10px 8px;
+  }
+  /* Phones: controls get a row of their own under the name. */
+  .header-controls {
+    grid-row: auto;
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    gap: 6px;
+  }
+  .kpis {
+    grid-row: auto;
+  }
+  /* The floating button shrinks to its icon so it covers less of the page. */
+  .assistant-fab-label {
+    display: none;
+  }
+  .assistant-fab {
+    padding: 12px;
+  }
+  .app {
+    padding-bottom: 80px; /* room to scroll the last panel clear of the button */
+  }
+  .brand h1 {
+    font-size: 22px;
+  }
+  .brand-mark {
+    width: 24px;
+    height: 24px;
+  }
+  .wiki-filter select {
+    width: 118px;
+    min-width: 0;
+    padding: 6px 26px 6px 8px;
+  }
+  .wiki-filter::after {
+    right: 10px;
+  }
+  .kpi {
+    min-width: 0;
+    padding: 0 6px;
+  }
+  .kpi-value {
+    font-size: 17px;
+  }
+  .kpi-label {
+    overflow: hidden;
+    font-size: 8.5px;
+    letter-spacing: 0.04em;
+    text-overflow: ellipsis;
+  }
+  .board {
+    gap: 32px;
+    grid-template-areas: "pulse" "flags" "feed" "heart" "top" "minute" "sizes" "editors" "wikis";
+  }
+  .feed,
+  .flagged {
+    height: 460px;
+  }
+  .pulse-headline {
+    font-size: 26px;
+  }
+  .pulse-summary {
+    font-size: 15.5px;
+  }
+  .chip-model {
+    display: none;
+  }
+  /* The page title gets its own line instead of a few squeezed letters. */
+  .feed-title {
+    order: 5;
+    flex-basis: 100%;
+  }
+  .feed-delta {
+    margin-left: auto;
+  }
+  .card-head {
+    flex-wrap: wrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-live .status-dot,
+  .kpi-bump .kpi-value,
+  .flagged-reviewing .flag {
+    animation: none;
+  }
+}
