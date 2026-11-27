@@ -2,16 +2,19 @@ import { memo, useMemo } from "react";
 import { formatClock, safeUrl, wikiLabel } from "../lib/format";
 import type { AiInfo, Edit, Flag } from "../types";
 import { FlagBadge } from "./FlagBadge";
+import { Skeleton } from "./Skeleton";
 
 interface Props {
   edits: Edit[];
   ai: AiInfo;
+  /** No data from the server yet. */
+  loading?: boolean;
 }
 
 /** Most serious first; within a level, newest first (input order). */
 const RANK: Record<Flag["status"], number> = { flagged: 0, suspect: 1, reviewing: 2, cleared: 3 };
 
-export const FlaggedEdits = memo(function FlaggedEdits({ edits, ai }: Props) {
+export const FlaggedEdits = memo(function FlaggedEdits({ edits, ai, loading = false }: Props) {
   const { open, cleared, counts } = useMemo(() => {
     const withFlag = edits.filter((e): e is Edit & { flag: Flag } => e.flag != null);
     const open = withFlag
@@ -46,7 +49,9 @@ export const FlaggedEdits = memo(function FlaggedEdits({ edits, ai }: Props) {
           </span>
         </div>
       )}
-      {open.length === 0 && cleared.length === 0 ? (
+      {loading ? (
+        <Skeleton rows={4} variant="list" label="Loading flagged edits" />
+      ) : open.length === 0 && cleared.length === 0 ? (
         <div className="empty-state">
           <span className="empty-icon" aria-hidden="true">✓</span>
           <p>Nothing suspicious so far.</p>

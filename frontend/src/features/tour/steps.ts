@@ -3,7 +3,7 @@ import type { TourStep } from "./Tour";
 /** One stop per section of the dashboard, in reading order. */
 export const DASHBOARD_TOUR: TourStep[] = [
   {
-    title: "Welcome to WikiPulse 👋",
+    title: "Welcome to WikiPulse",
     body: "A quick tour of the dashboard: about a minute. Use Next or the arrow keys, and Skip or Esc to leave any time.",
   },
   {
@@ -39,7 +39,7 @@ export const DASHBOARD_TOUR: TourStep[] = [
   {
     target: ".feed",
     title: "Live feed",
-    body: "Every edit as it arrives: page, wiki, editor and size change. Hover the feed (or press Pause) to freeze it and read; new edits wait until you resume.",
+    body: "Recent edits: page, wiki, editor and size change. The feed starts paused and catches up every two minutes, so it stays readable. Press Go live to watch every edit as it arrives, and Pause to stop again.",
   },
   {
     target: ".flagged",

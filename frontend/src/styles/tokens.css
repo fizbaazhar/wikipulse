@@ -1,120 +1,123 @@
 /* ---------------------------------------------------------------- tokens */
 /* :root holds the dark palette and [data-theme="light"] the light one.
-   The app defaults to light: useTheme always sets data-theme on <html>.
-   Light palette: primary #4B49AC, supporting #7DA0FA / #7978E9 / #F3797E. */
+   The app defaults to light: useTheme always sets data-theme on <html>. */
+/* Editorial look: ink on paper. No cards, no glow: sections are set off by
+   rules and type. One accent (ink blue); red is reserved for vandalism. */
 :root {
   color-scheme: dark;
-  /* Dark: neutral graphite, flat surfaces, one muted blue accent. */
-  --bg: #09090b;
+  --bg: #0e0e0d;
   --bg-glow: none;
-  --surface: #111113;
-  --surface-2: #18181b;
-  --surface-3: #232327;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  --text: #ededef;
-  --text-2: #a1a1aa;
-  --muted: #85858f;
-  --accent: #7aa7f5;
-  --accent-soft: rgba(122, 167, 245, 0.12);
-  --bar: #2a2a30;
-  --danger: #f2777c;
-  --danger-soft: rgba(242, 119, 124, 0.12);
-  --warn: #e5b454;
-  --warn-soft: rgba(229, 180, 84, 0.12);
-  --info: #7aa7f5;
-  --info-soft: rgba(122, 167, 245, 0.12);
-  --ok: #a1a1aa;
-  --ok-soft: rgba(161, 161, 170, 0.1);
-  --radius: 14px;
+  --surface: #0e0e0d;
+  --surface-2: #181816;
+  --surface-3: #232320;
+  --border: #2a2926;
+  --border-strong: #3d3c37;
+  --rule: #ecebe6; /* the heavy line above each section */
+  --text: #ecebe6;
+  --text-2: #b4b2aa;
+  --muted: #8b8880;
+  --accent: #8db1ff;
+  --accent-soft: rgba(141, 177, 255, 0.12);
+  --bar: #3d3c37;
+  --danger: #ff6b6b;
+  --danger-soft: rgba(255, 107, 107, 0.1);
+  --warn: #e3b341;
+  --warn-soft: rgba(227, 179, 65, 0.1);
+  --info: #8db1ff;
+  --info-soft: rgba(141, 177, 255, 0.1);
+  --ok: #b4b2aa;
+  --ok-soft: rgba(180, 178, 170, 0.1);
+  --radius: 2px;
   --shadow: none;
-  --header-bg: rgba(9, 9, 11, 0.88);
+  --header-bg: #0e0e0d;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --sans: "Inter Variable", Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --display: var(--sans);
+  --serif: "Source Serif 4 Variable", "Source Serif 4", Georgia, "Times New Roman", serif;
+  --display: var(--serif);
   --glass: var(--surface);
   --glass-edge: linear-gradient(var(--border), var(--border));
-  --neon: #7aa7f5;
-  --neon-2: #7aa7f5;
-  --neon-3: #7aa7f5;
-  --neon-4: #7aa7f5;
-  --glow: 0 0 0 3px rgba(122, 167, 245, 0.18);
+  --neon: var(--accent);
+  --neon-2: var(--accent);
+  --neon-3: var(--accent);
+  --neon-4: var(--accent);
+  --glow: 0 0 0 2px rgba(141, 177, 255, 0.25);
   --aurora-1: transparent;
   --aurora-2: transparent;
   --aurora-3: transparent;
-  --logo-bg: #ededef;
-  --logo-ink: #09090b;
+  --logo-bg: #ecebe6;
+  --logo-ink: #0e0e0d;
 
-  /* Chart palette (validated with the dataviz script against #111113) */
-  --series-1: #3a9ad0; /* humans / registered */
-  --series-2: #6461d6; /* bots */
-  --series-3: #e15f69; /* logged out */
-  --series-other: #52525b;
-  --wiki-1: #6461d6;
-  --wiki-2: #e15f69;
-  --wiki-3: #3a9ad0;
-  --wiki-4: #b98000;
-  --wiki-5: #1a9c80;
-  --diverge-pos: #3a9ad0;
-  --diverge-neg: #e15f69;
-  --diverge-mid: #3f3f46;
-  --chart-grid: #1e1e22;
-  --chart-axis: #2e2e34;
-  --chart-ink: #85858f;
+  /* Chart palette (validated with the dataviz script against #0e0e0d) */
+  --series-1: #5b86f0; /* humans / registered */
+  --series-2: #bb8016; /* bots */
+  --series-3: #1fa08c; /* logged out */
+  --series-other: #4a4944;
+  --wiki-1: #5b86f0;
+  --wiki-2: #bb8016;
+  --wiki-3: #1fa08c;
+  --wiki-4: #9277e0;
+  --wiki-5: #e0668a;
+  --diverge-pos: #5b86f0;
+  --diverge-neg: #e0668a;
+  --diverge-mid: #3d3c37;
+  --chart-grid: #1f1f1c;
+  --chart-axis: #3d3c37;
+  --chart-ink: #8b8880;
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --logo-bg: #4b49ac;
-  --logo-ink: #ffffff;
-  --bg: #f5f7ff;
+  --logo-bg: #141414;
+  --logo-ink: #f6f4ef;
+  --bg: #f6f4ef;
   --bg-glow: none;
-  --surface: #ffffff;
-  --surface-2: #f5f6fd;
-  --surface-3: #eceefa;
-  --border: #e7e9f5;
-  --border-strong: #d6d9ee;
-  --text: #1f1f2e;
-  --text-2: #4a4c66;
-  --muted: #7a7c96;
-  --accent: #4b49ac;
-  --accent-soft: #ededfa;
-  --bar: #c9d6fb;
-  --danger: #d9474f;
-  --danger-soft: #fdedee;
-  --warn: #a86a00;
-  --warn-soft: #fff4de;
-  --info: #4b6fd8;
-  --info-soft: #eaf0ff;
-  --ok: #4a4c66;
-  --ok-soft: #eff0f7;
-  --shadow: 0 4px 18px rgba(75, 73, 172, 0.06);
-  --header-bg: rgba(255, 255, 255, 0.92);
-  --glass: #ffffff;
-  --glass-edge: linear-gradient(#e7e9f5, #e7e9f5);
-  --neon: #4b49ac;
-  --neon-2: #7da0fa;
-  --neon-3: #7978e9;
-  --neon-4: #f3797e;
-  --glow: 0 0 0 3px rgba(75, 73, 172, 0.12);
+  --surface: #f6f4ef;
+  --surface-2: #edeae3;
+  --surface-3: #e3dfd6;
+  --border: #dad5ca;
+  --border-strong: #bdb7aa;
+  --rule: #141414;
+  --text: #141414;
+  --text-2: #46433d;
+  --muted: #736f66;
+  --accent: #1d4ed8;
+  --accent-soft: rgba(29, 78, 216, 0.08);
+  --bar: #c9c3b6;
+  --danger: #c8102e;
+  --danger-soft: rgba(200, 16, 46, 0.07);
+  --warn: #8a5a00;
+  --warn-soft: rgba(138, 90, 0, 0.08);
+  --info: #1d4ed8;
+  --info-soft: rgba(29, 78, 216, 0.08);
+  --ok: #46433d;
+  --ok-soft: rgba(70, 67, 61, 0.08);
+  --shadow: none;
+  --header-bg: #f6f4ef;
+  --glass: var(--surface);
+  --glass-edge: linear-gradient(var(--border), var(--border));
+  --neon: var(--accent);
+  --neon-2: var(--accent);
+  --neon-3: var(--accent);
+  --neon-4: var(--accent);
+  --glow: 0 0 0 2px rgba(29, 78, 216, 0.2);
   --aurora-1: transparent;
   --aurora-2: transparent;
   --aurora-3: transparent;
 
-  /* Chart palette (validated with the dataviz script, light) */
-  --series-1: #7da0fa;
-  --series-2: #4b49ac;
-  --series-3: #f3797e;
-  --series-other: #c6c8dc;
-  --wiki-1: #4b49ac;
-  --wiki-2: #f3797e;
-  --wiki-3: #7da0fa;
-  --wiki-4: #e3a008;
-  --wiki-5: #1f9e89;
-  --diverge-pos: #7da0fa;
-  --diverge-neg: #f3797e;
-  --diverge-mid: #c6c8dc;
-  --chart-grid: #eef0f8;
-  --chart-axis: #d6d9ee;
-  --chart-ink: #7a7c96;
+  /* Chart palette (validated with the dataviz script against #f6f4ef) */
+  --series-1: #2f5fd0;
+  --series-2: #b86e00;
+  --series-3: #00927e;
+  --series-other: #bdb7aa;
+  --wiki-1: #2f5fd0;
+  --wiki-2: #b86e00;
+  --wiki-3: #00927e;
+  --wiki-4: #7a5cc0;
+  --wiki-5: #c4456b;
+  --diverge-pos: #2f5fd0;
+  --diverge-neg: #c4456b;
+  --diverge-mid: #bdb7aa;
+  --chart-grid: #e6e2d9;
+  --chart-axis: #bdb7aa;
+  --chart-ink: #736f66;
 }

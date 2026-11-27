@@ -30,11 +30,15 @@ interface Props {
 }
 
 export function Dashboard({ theme, onToggleTheme, user, onLogout, onUnauthorized }: Props) {
-  const { state, setWiki, togglePause, refreshPulse } = useWikiPulse(undefined, onUnauthorized);
+  const { state, setWiki, togglePause, refreshFeed, nextFeedUpdate, refreshPulse } = useWikiPulse(
+    undefined,
+    onUnauthorized,
+  );
   const now = useNow();
   const tour = useTour();
   const { snapshot } = state;
   const flaggedCount = state.flagged.filter((e) => e.flag?.status === "flagged").length;
+  const loading = snapshot === null; // nothing from the server yet
   const windowSeconds = snapshot?.window_seconds ?? 300;
 
   return (
@@ -60,22 +64,24 @@ export function Dashboard({ theme, onToggleTheme, user, onLogout, onUnauthorized
       )}
       {/* Command-center grid (see .board in styles/layout.css): what is happening now
           on the first screen, the deeper charts below. */}
-      <main className="board">
+      <main className={loading ? "board is-loading" : "board"} aria-busy={loading}>
         <PulseCard pulse={state.pulse} ai={state.ai} now={now} onRefresh={refreshPulse} />
         <LiveHeartbeat series={snapshot?.per_second ?? []} />
-        <TopPages pages={snapshot?.top_pages ?? []} windowSeconds={windowSeconds} />
+        <TopPages pages={snapshot?.top_pages ?? []} windowSeconds={windowSeconds} loading={loading} />
         <LiveFeed
           edits={state.edits}
           feedVersion={state.feedVersion}
           paused={state.paused}
           pendingCount={state.pending.length}
           onTogglePause={togglePause}
+          onRefresh={refreshFeed}
+          nextUpdate={nextFeedUpdate}
         />
-        <FlaggedEdits edits={state.flagged} ai={state.ai} />
+        <FlaggedEdits edits={state.flagged} ai={state.ai} loading={loading} />
         <EditsPerMinuteChart data={snapshot?.wiki_minutes ?? EMPTY_MINUTES} />
         <EditSizeChart bins={snapshot?.size_histogram ?? []} windowSeconds={windowSeconds} />
         <EditorMix editors={snapshot?.editors ?? EMPTY_EDITORS} windowSeconds={windowSeconds} />
-        <BusiestWikis wikis={snapshot?.wikis ?? []} selected={state.wiki} onSelect={setWiki} />
+        <BusiestWikis wikis={snapshot?.wikis ?? []} selected={state.wiki} onSelect={setWiki} loading={loading} />
       </main>
       <footer className="footer muted small">
         Data: Wikimedia EventStreams (recentchange). Edit summaries are written by the public and shown as plain text.

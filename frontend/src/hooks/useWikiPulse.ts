@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { initialState, reducer } from "../state/dashboard";
 import type { Pulse, ServerMessage } from "../types";
 import { useLatest } from "./useLatest";
@@ -7,6 +7,8 @@ const MIN_RETRY_MS = 1_000;
 const MAX_RETRY_MS = 15_000;
 /** Close code the server uses when the session is missing or expired. */
 const WS_UNAUTHORIZED = 4401;
+/** How often a paused feed catches up on its own. */
+export const FEED_REFRESH_MS = 120_000;
 
 /** WebSocket URL: same origin by default (Vite proxy in dev, nginx in Docker). */
 function defaultSocketUrl(): string {
@@ -22,7 +24,11 @@ function defaultSocketUrl(): string {
  * wiki filter, and the server's "hello" replaces local state, so nothing is
  * lost or duplicated across a reconnect.
  */
-export function useWikiPulse(url: string = defaultSocketUrl(), onUnauthorized?: () => void) {
+export function useWikiPulse(
+  url: string = defaultSocketUrl(),
+  onUnauthorized?: () => void,
+  feedRefreshMs: number = FEED_REFRESH_MS,
+) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const socket = useRef<WebSocket | null>(null);
   const wikiRef = useRef<string | null>(null);
@@ -91,6 +97,26 @@ export function useWikiPulse(url: string = defaultSocketUrl(), onUnauthorized?: 
 
   const togglePause = useCallback(() => dispatch({ type: "togglePause" }), []);
 
+  // While paused, the feed catches up on a timer. "Update now" restarts it.
+  const [feedCycle, setFeedCycle] = useState(0);
+  const [nextFeedUpdate, setNextFeedUpdate] = useState<number | null>(null);
+  useEffect(() => {
+    if (!state.paused) {
+      setNextFeedUpdate(null);
+      return;
+    }
+    setNextFeedUpdate(Date.now() + feedRefreshMs);
+    const id = setInterval(() => {
+      dispatch({ type: "refreshFeed" });
+      setNextFeedUpdate(Date.now() + feedRefreshMs);
+    }, feedRefreshMs);
+    return () => clearInterval(id);
+  }, [state.paused, feedCycle, feedRefreshMs]);
+  const refreshFeed = useCallback(() => {
+    dispatch({ type: "refreshFeed" });
+    setFeedCycle((n) => n + 1);
+  }, []);
+
   const refreshPulse = useCallback(async () => {
     const response = await fetch("/api/pulse/refresh", { method: "POST", credentials: "same-origin" });
     if (response.status === 401) unauthorizedRef.current?.();
@@ -100,5 +126,5 @@ export function useWikiPulse(url: string = defaultSocketUrl(), onUnauthorized?: 
     return body.refreshed;
   }, []);
 
-  return { state, setWiki, togglePause, refreshPulse };
+  return { state, setWiki, togglePause, refreshFeed, nextFeedUpdate, refreshPulse };
 }

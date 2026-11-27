@@ -1,5 +1,5 @@
-/* Order matters: later files deliberately override earlier ones (the "bold"
-   theme layer restyles the base sections), so keep this list as is. */
+/* Order matters: later files override earlier ones. editorial.css is last:
+   it sets the look (rules, type, one accent) on top of the base sections. */
 @import "./tokens.css";
 @import "./base.css";
 @import "./layout.css";
@@ -9,9 +9,8 @@
 @import "./flags.css";
 @import "./motion.css";
 @import "./charts.css";
-@import "./theme-bold.css";
 @import "./login.css";
 @import "./tour.css";
 @import "./font-tweaks.css";
 @import "./assistant.css";
-@import "./theme-dark.css";
+@import "./editorial.css";
