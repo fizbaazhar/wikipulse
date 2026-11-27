@@ -48,7 +48,8 @@ so the page, API and WebSocket share one origin. In Render, choose New →
 Blueprint and pick this repo: `render.yaml` sets everything except the secrets,
 which Render asks for (login password, Azure key, endpoint and deployment).
 
-**Tests:** `make test` (back end + front end) and `make e2e` (browser test).
+**Tests:** `make test` (back end + front end), `make e2e` (Cypress browser
+tests) and `make e2e-selenium` (Selenium with C#; needs the .NET SDK).
 Run `make help` to see every command.
 
 <details>
@@ -86,10 +87,10 @@ npm run e2e        # or npm run e2e:open for the Cypress app
 | Extra: login | `backend/app/auth.py`, `LoginPage.tsx`, `useAuth.ts` | One account from `.env`; signed HttpOnly SameSite=Strict session cookie; `/api` and `/ws` closed without it; failed logins throttled |
 | Extra: AI assistant | `backend/app/ai/assistant.py`, `AssistantChat.tsx`, `useAssistant.ts` | Chat panel ("Ask AI") that streams answers ChatGPT-style (NDJSON over fetch, Stop button) from the live dashboard data, in the user's language; declines questions that are not about the dashboard in one line; public text sent as escaped JSON; has its own hourly limit (30 calls, so background vandalism review cannot starve it) and shares the daily budget; falls back to answers from the numbers when AI is unavailable |
 | Extra: guided tour | `frontend/src/features/tour/` | 15-step walkthrough that spotlights each section on first sign-in; replay from the **?** button; keyboard (arrows / Esc) and mobile bottom-sheet support |
-| Tests | `backend/tests`, `frontend/src/**/*.test.*`, `frontend/cypress/e2e` | 265 back end, 82 front end, 29 end-to-end |
+| Tests | `backend/tests`, `frontend/src/**/*.test.*`, `frontend/cypress/e2e` | 265 back end, 82 front end, 29 Cypress + 11 Selenium end-to-end |
 | Optional: Docker | `docker-compose.yml` | nginx serves the dashboard and proxies `/api` and `/ws` |
 | Optional: deployed demo | `Dockerfile`, `render.yaml` | One Render web service; the back end serves the built dashboard |
-| Optional: E2E UI test | `frontend/cypress/e2e/*.cy.ts` | Cypress (reason below) |
+| Optional: E2E UI test | `frontend/cypress/e2e/*.cy.ts`, `e2e-selenium/` | Cypress for the full suite, plus the main flows in Selenium with C# (reason below) |
 
 **Starter files:** the brief asks to start from `LiveFeed.tsx` and
 `stream_client.py`. They were not in the materials I received, so I built the
@@ -159,6 +160,7 @@ frontend/
     lib/                formatting, safeUrl, reduced-motion check
     styles/             CSS split by area, imported in order from index.css; editorial.css sets the look
   cypress/              Cypress end-to-end tests against the real back end
+e2e-selenium/           Selenium + C# (NUnit) tests of the main flows, page objects in Pages/
 ```
 
 The WebSocket message protocol is documented at the top of `backend/app/api/ws.py`.
@@ -355,7 +357,17 @@ I tested where bugs would be expensive or hard to see:
     (`/api/health`), every accepted edit is counted once, the feed shows no
     repeats or rejected events, and the edit with no `meta` block is kept.
 
-**Why Cypress, not Selenium with C#:** the dashboard is TypeScript, so the
+**Selenium with C# as well:** the brief prefers Selenium with C#, so the main
+flows also run there (`e2e-selenium/`, NUnit, .NET 10): login (closed
+dashboard, wrong password, sign in, reload, sign out), the header, top pages,
+pausing the feed, the wiki filter, the planted XSS payloads, and the assistant.
+Each page has a page object (`Pages/LoginPage.cs`, `Pages/DashboardPage.cs`),
+waits are explicit (no sleeps), and every test fails if anything calls
+`alert()`. `make e2e-selenium` starts the same two servers and runs
+`dotnet test`; Selenium Manager fetches the matching chromedriver. `HEADED=1`
+shows the browser.
+
+**Why Cypress for the full suite:** the dashboard is TypeScript, so those
 tests live in the same language and toolchain as the code they test. They need
 no .NET runtime or separate WebDriver. Cypress retries every command and
 assertion until it passes or times out, so a live-updating UI needs no sleeps,
@@ -377,7 +389,7 @@ tests headless, so `make e2e` is a single command locally or in CI.
    fits here) with a queue between them, so several API instances can serve
    clients.
 5. **Pulse per wiki**, cached per filter, plus links from the summary to the pages.
-6. CI pipeline running `make test` and `make e2e` on every pull request.
+6. CI pipeline running `make test`, `make e2e` and `make e2e-selenium` on every pull request.
 
 ## Known limitations
 
