@@ -31,3 +31,8 @@ cypress/downloads/
 
 # TypeScript incremental build cache
 *.tsbuildinfo
+
+# .NET build output (Selenium tests)
+e2e-selenium/bin/
+e2e-selenium/obj/
+e2e-selenium/TestResults/

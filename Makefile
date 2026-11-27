@@ -1,7 +1,7 @@
 # Shortcuts for local development. Run `make help` to list them.
 PY := backend/.venv/bin
 
-.PHONY: help install backend replay frontend test test-backend test-frontend e2e docker
+.PHONY: help install backend replay frontend test test-backend test-frontend e2e e2e-selenium docker
 
 help: ## List available commands
 	@grep -E '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -30,6 +30,9 @@ test-frontend: ## Front-end type check and tests (vitest)
 
 e2e: ## End-to-end browser test (Cypress, against the real back end on the sample)
 	cd frontend && npm run e2e
+
+e2e-selenium: ## The same flows in Selenium with C# (needs the .NET SDK and Chrome)
+	cd frontend && npm run e2e:selenium
 
 docker: ## Build and run everything with Docker on http://localhost:8080
 	docker compose up --build
