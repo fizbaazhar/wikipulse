@@ -154,7 +154,7 @@ describe("Data quality: the problems in the recorded sample never reach the dash
   });
 
   it("a broken line in the stream doesn't break the page", () => {
-    cy.findByRole("status").should("contain.text", "Replay");
+    cy.get("header").findByRole("status").should("contain.text", "Replay");
     cy.findByRole("alert").should("not.exist");
     cy.get(".top-pages .top-item").should("have.length", 10);
   });

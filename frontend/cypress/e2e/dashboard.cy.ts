@@ -10,7 +10,7 @@ describe("WikiPulse dashboard (replaying the recorded sample)", () => {
 
   it("shows the header: connection status and key numbers", () => {
     cy.findByRole("heading", { name: "WikiPulse" }).should("be.visible");
-    cy.findByRole("status").should("contain.text", "Replay");
+    cy.get("header").findByRole("status").should("contain.text", "Replay");
     cy.findByLabelText("Key numbers").within(() => {
       // The e2e back end uses a one-hour window (see e2e:backend), so "Last 60 min".
       for (const label of ["Edits / min", /^Last \d+ min$/, "By bots", "Wikis active", "Flagged"]) {

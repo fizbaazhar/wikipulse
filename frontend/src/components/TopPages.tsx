@@ -3,13 +3,16 @@ import { Sparkline, trendDirection } from "../charts/Sparkline";
 import { useReorderAnimation } from "../hooks/useReorderAnimation";
 import { safeUrl, wikiLabel, windowMinutes } from "../lib/format";
 import type { TopPage } from "../types";
+import { Skeleton } from "./Skeleton";
 
 interface Props {
   pages: TopPage[];
   windowSeconds: number;
+  /** No data from the server yet. */
+  loading?: boolean;
 }
 
-export const TopPages = memo(function TopPages({ pages, windowSeconds }: Props) {
+export const TopPages = memo(function TopPages({ pages, windowSeconds, loading = false }: Props) {
   const listRef = useReorderAnimation<HTMLOListElement>();
   const max = Math.max(1, ...pages.map((p) => p.count));
   const minutes = windowMinutes(windowSeconds);
@@ -18,7 +21,9 @@ export const TopPages = memo(function TopPages({ pages, windowSeconds }: Props) 
       <div className="card-head">
         <h2 id="top-title">Most edited · last {minutes} min</h2>
       </div>
-      {pages.length === 0 ? (
+      {loading ? (
+        <Skeleton rows={6} variant="list" label="Loading most edited pages" />
+      ) : pages.length === 0 ? (
         <p className="muted">No edits yet.</p>
       ) : (
         <ol className="top-list" ref={listRef}>

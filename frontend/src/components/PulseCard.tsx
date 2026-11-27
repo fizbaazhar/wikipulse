@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { timeAgo } from "../lib/format";
 import type { AiInfo, Pulse } from "../types";
+import { Skeleton } from "./Skeleton";
 
 interface Props {
   pulse: Pulse | null;
@@ -66,7 +67,7 @@ export function PulseCard({ pulse, ai, now, onRefresh }: Props) {
           </p>
         </>
       ) : (
-        <p className="muted">Waiting for the first summary…</p>
+        <Skeleton rows={4} label="Loading the summary" caption="Writing the first summary…" />
       )}
       {message && <p className="muted small">{message}</p>}
     </section>

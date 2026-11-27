@@ -4,6 +4,7 @@ import { useNow } from "../hooks/useNow";
 import { formatClock, formatDelta, safeUrl, wikiLabel } from "../lib/format";
 import type { Edit } from "../types";
 import { FlagBadge } from "./FlagBadge";
+import { Skeleton } from "./Skeleton";
 
 interface Props {
   edits: Edit[];
@@ -71,7 +72,7 @@ export function LiveFeed({ edits, feedVersion, paused, pendingCount, onTogglePau
         </div>
       </div>
       {shown.length === 0 ? (
-        <p className="muted">Waiting for edits…</p>
+        <Skeleton rows={6} variant="list" label="Loading edits" caption="Waiting for edits…" />
       ) : (
         <ul className="feed-list" aria-live="off">
           {shown.map((e) => (
