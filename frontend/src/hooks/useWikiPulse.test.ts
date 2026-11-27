@@ -77,4 +77,61 @@ describe("useWikiPulse", () => {
     act(() => next.open());
     expect(next.sent).toEqual([JSON.stringify({ type: "subscribe", wiki: "frwiki" })]);
   });
+
+  describe("paused feed", () => {
+    const hello = JSON.stringify({
+      type: "hello",
+      source: { source: "live", connected: true },
+      ai: { enabled: false, model: null },
+      recent: [{ id: "a" }],
+      flagged: [],
+      snapshot: null,
+      pulse: null,
+    });
+    const edits = (...ids: string[]) => JSON.stringify({ type: "edits", items: ids.map((id) => ({ id })) });
+
+    function connected(refreshMs = 1_000) {
+      const hook = renderHook(() => useWikiPulse("ws://a", undefined, refreshMs));
+      const socket = FakeSocket.instances[0];
+      act(() => socket.open());
+      act(() => socket.onmessage?.({ data: hello }));
+      return { ...hook, socket };
+    }
+    const feed = (r: { current: ReturnType<typeof useWikiPulse> }) => r.current.state.edits.map((e) => e.id);
+
+    it("starts paused and catches up on its own every interval", () => {
+      const { result, socket } = connected();
+      expect(result.current.state.paused).toBe(true);
+      act(() => socket.onmessage?.({ data: edits("b") }));
+      expect(feed(result)).toEqual(["a"]);
+
+      act(() => vi.advanceTimersByTime(999));
+      expect(feed(result)).toEqual(["a"]);
+      act(() => vi.advanceTimersByTime(1));
+      expect(feed(result)).toEqual(["b", "a"]);
+      expect(result.current.state.paused).toBe(true);
+      expect(result.current.nextFeedUpdate).not.toBeNull();
+    });
+
+    it("shows waiting edits at once on request and restarts the countdown", () => {
+      const { result, socket } = connected();
+      act(() => vi.advanceTimersByTime(600));
+      act(() => socket.onmessage?.({ data: edits("b") }));
+      act(() => result.current.refreshFeed());
+      expect(feed(result)).toEqual(["b", "a"]);
+
+      act(() => socket.onmessage?.({ data: edits("c") }));
+      act(() => vi.advanceTimersByTime(600)); // the old timer would have fired here
+      expect(feed(result)).toEqual(["b", "a"]);
+      act(() => vi.advanceTimersByTime(400));
+      expect(feed(result)).toEqual(["c", "b", "a"]);
+    });
+
+    it("stops the timer when the feed goes live", () => {
+      const { result } = connected();
+      act(() => result.current.togglePause());
+      expect(result.current.state.paused).toBe(false);
+      expect(result.current.nextFeedUpdate).toBeNull();
+    });
+  });
 });

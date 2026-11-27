@@ -76,13 +76,13 @@ npm run e2e        # or npm run e2e:open for the Cypress app
 | Edits per minute | `EditsPerMinuteChart.tsx` | Last 30 minutes, stacked by the 5 busiest wikis + Other |
 | Extra charts | `LiveHeartbeat.tsx`, `EditorMix.tsx`, `EditSizeChart.tsx`, `BusiestWikis.tsx`, sparklines in `TopPages.tsx` | Edits per second (humans vs bots, scrolling), who is editing, edit-size histogram, click-to-filter wiki bars, per-page trend + "rising" |
 | Top 10 pages in the last 5 minutes | `TopPages.tsx` | Per wiki, follows the filter |
-| Live feed with a filter by wiki | `LiveFeed.tsx`, `Header.tsx` | Filter is applied on the server to every panel. Edits trickle in smoothly, the feed holds while you hover, and can be paused |
+| Live feed with a filter by wiki | `LiveFeed.tsx`, `Header.tsx` | Filter is applied on the server to every panel. The feed starts paused and catches up every 2 minutes so it stays readable; Go live follows every edit (trickled in smoothly, held while you hover) |
 | Pulse summary (AI) | `backend/app/ai/pulse.py`, `PulseCard.tsx` | Rule-based fallback; AI only when trending changes |
 | Vandalism flag with a reason (AI) | `vandalism.py`, `ai/moderator.py`, `FlaggedEdits.tsx` | Rules first, AI second opinion |
 | Extra: login | `backend/app/auth.py`, `LoginPage.tsx`, `useAuth.ts` | One account from `.env`; signed HttpOnly SameSite=Strict session cookie; `/api` and `/ws` closed without it; failed logins throttled |
 | Extra: AI assistant | `backend/app/ai/assistant.py`, `AssistantChat.tsx`, `useAssistant.ts` | Chat panel ("Ask AI") that streams answers ChatGPT-style (NDJSON over fetch, Stop button) from the live dashboard data, in the user's language; declines questions that are not about the dashboard in one line; public text sent as escaped JSON; has its own hourly limit (30 calls, so background vandalism review cannot starve it) and shares the daily budget; falls back to answers from the numbers when AI is unavailable |
 | Extra: guided tour | `frontend/src/features/tour/` | 15-step walkthrough that spotlights each section on first sign-in; replay from the **?** button; keyboard (arrows / Esc) and mobile bottom-sheet support |
-| Tests | `backend/tests`, `frontend/src/**/*.test.*`, `frontend/cypress/e2e` | 231 back end, 71 front end, 29 end-to-end |
+| Tests | `backend/tests`, `frontend/src/**/*.test.*`, `frontend/cypress/e2e` | 231 back end, 78 front end, 29 end-to-end |
 | Optional: Docker | `docker-compose.yml` | nginx serves the dashboard and proxies `/api` and `/ws` |
 | Optional: deployed demo | `Dockerfile`, `render.yaml` | One Render web service; the back end serves the built dashboard |
 | Optional: E2E UI test | `frontend/cypress/e2e/*.cy.ts` | Cypress (reason below) |
@@ -152,7 +152,7 @@ frontend/
     features/auth/      login page and session hook
     features/profile/   account menu (avatar dropdown with Sign out)
     lib/                formatting, safeUrl, reduced-motion check
-    styles/             CSS split by area, imported in order from index.css
+    styles/             CSS split by area, imported in order from index.css; editorial.css sets the look
   cypress/              Cypress end-to-end tests against the real back end
 ```
 
@@ -319,14 +319,14 @@ I tested where bugs would be expensive or hard to see:
   every error path without a key or network. A test also checks both prompt
   schemas meet OpenAI strict-mode rules.
 - **WebSocket end to end:** the replay source drives the real app.
-- **Front end:** the reducer (de-duplication, pause, late AI verdicts), XSS
+- **Front end:** the reducer (de-duplication, pause and the 2-minute catch-up, late AI verdicts), XSS
   rendering, `javascript:` links, and components.
 - **Browser E2E:** Cypress runs the real back end on the sample (AI off) and the
   real dashboard in a real browser, one spec per area:
   - `auth.cy.ts`: closed routes and API without a session, wrong password,
     sign in, reload, sign out, account menu, rate-limit and network errors.
-  - `dashboard.cy.ts`: header numbers, Pulse and Refresh, top pages, feed and
-    Pause, every chart (hover tooltip, screen-reader tables), flags, the wiki
+  - `dashboard.cy.ts`: header numbers, Pulse and Refresh, top pages, the feed
+    (paused with a countdown, Go live, Pause), every chart (hover tooltip, screen-reader tables), flags, the wiki
     filter from the menu and from the busiest wikis, dark theme, phone width,
     and that the planted XSS payloads are shown as text and never execute.
   - `assistant.cy.ts`: suggestions, answers from live data, panel questions,

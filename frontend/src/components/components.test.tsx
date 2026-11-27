@@ -30,19 +30,32 @@ describe("LiveFeed", () => {
     expect(screen.getByText("Mars").closest("a")).not.toHaveAttribute("href");
   });
 
-  it("shows flag badges and the pause state", async () => {
+  it("shows flag badges, and while paused: the next update, show-now and Go live", async () => {
     const onToggle = vi.fn();
+    const onRefresh = vi.fn();
     render(
       <LiveFeed
         edits={[makeEdit({ flag: makeFlag({ status: "reviewing" }) })]}
         paused
         pendingCount={7}
         onTogglePause={onToggle}
+        onRefresh={onRefresh}
+        nextUpdate={Date.now() + 83_000}
       />,
     );
     expect(screen.getByText("AI reviewing…")).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "Resume (7 new)" }));
+    const next = document.querySelector(".feed-next");
+    expect(next?.textContent).toMatch(/^Updates every 2 min · next in 1:2\d$/);
+    await userEvent.click(screen.getByRole("button", { name: "7 new" }));
+    expect(onRefresh).toHaveBeenCalledOnce();
+    await userEvent.click(screen.getByRole("button", { name: "Go live" }));
     expect(onToggle).toHaveBeenCalledOnce();
+  });
+
+  it("offers Pause while live", () => {
+    render(<LiveFeed edits={[makeEdit()]} paused={false} pendingCount={0} onTogglePause={() => {}} />);
+    expect(screen.getByRole("button", { name: "Pause" })).toBeInTheDocument();
+    expect(document.querySelector(".feed-next")).toBeNull();
   });
 
   it("does not stay held after the list disappears under the pointer", () => {

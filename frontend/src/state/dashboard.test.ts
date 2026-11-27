@@ -18,6 +18,9 @@ function hello(overrides: Partial<Extract<ServerMessage, { type: "hello" }>> = {
   };
 }
 
+/** The feed starts paused; most tests want it following the stream. */
+const live: DashboardState = { ...initialState, paused: false };
+
 const ids = (state: DashboardState, key: "edits" | "pending" | "flagged" = "edits") => state[key].map((e) => e.id);
 
 describe("dashboard reducer", () => {
@@ -29,8 +32,12 @@ describe("dashboard reducer", () => {
     expect(state.snapshot?.edits_last_minute).toBe(42);
   });
 
+  it("starts paused", () => {
+    expect(initialState.paused).toBe(true);
+  });
+
   it("new edits are prepended, duplicates skipped and the feed capped", () => {
-    let state = reducer(initialState, msg(hello()));
+    let state = reducer(live, msg(hello()));
     state = reducer(state, msg({ type: "edits", items: [makeEdit({ id: "b" }), makeEdit({ id: "c" }), makeEdit({ id: "d" })] }));
     expect(ids(state)).toEqual(["d", "c", "b", "a"]);
 
@@ -41,7 +48,7 @@ describe("dashboard reducer", () => {
   });
 
   it("pausing freezes the feed and buffers new edits until resume", () => {
-    let state = reducer(reducer(initialState, msg(hello())), { type: "togglePause" });
+    let state = reducer(reducer(live, msg(hello())), { type: "togglePause" });
     state = reducer(state, msg({ type: "edits", items: [makeEdit({ id: "c" })] }));
     expect(ids(state)).toEqual(["b", "a"]);
     expect(ids(state, "pending")).toEqual(["c"]);
@@ -52,6 +59,26 @@ describe("dashboard reducer", () => {
     expect(state.pending).toEqual([]);
   });
 
+  it("a paused feed catches up on refresh, stays paused and replaces in one block", () => {
+    let state = reducer(initialState, msg(hello()));
+    state = reducer(state, msg({ type: "edits", items: [makeEdit({ id: "c" }), makeEdit({ id: "d" })] }));
+    expect(ids(state)).toEqual(["b", "a"]);
+    const version = state.feedVersion;
+
+    state = reducer(state, { type: "refreshFeed" });
+    expect(ids(state)).toEqual(["d", "c", "b", "a"]);
+    expect(state.pending).toEqual([]);
+    expect(state.paused).toBe(true);
+    expect(state.feedVersion).toBe(version + 1);
+  });
+
+  it("refresh does nothing when live or when nothing is waiting", () => {
+    const paused = reducer(initialState, msg(hello()));
+    expect(reducer(paused, { type: "refreshFeed" })).toBe(paused);
+    const following = reducer(live, msg(hello()));
+    expect(reducer(following, { type: "refreshFeed" })).toBe(following);
+  });
+
   it("flagged edits in the stream go to the vandalism panel", () => {
     let state = reducer(initialState, msg(hello()));
     state = reducer(state, msg({ type: "edits", items: [makeEdit({ id: "v", flag: makeFlag({ status: "reviewing" }) })] }));
@@ -59,7 +86,7 @@ describe("dashboard reducer", () => {
   });
 
   it("a late AI verdict updates the edit everywhere it appears", () => {
-    let state = reducer(initialState, msg(hello()));
+    let state = reducer(live, msg(hello()));
     state = reducer(state, msg({ type: "edits", items: [makeEdit({ id: "v", flag: makeFlag({ status: "reviewing" }) })] }));
 
     const verdict = makeEdit({ id: "v", flag: makeFlag({ status: "cleared", source: "ai", reason: "Routine trim" }) });
@@ -71,7 +98,7 @@ describe("dashboard reducer", () => {
   });
 
   it("reset after changing wiki replaces the feed and drops buffered edits", () => {
-    let state = reducer(reducer(initialState, msg(hello())), { type: "togglePause" });
+    let state = reducer(initialState, msg(hello())); // paused
     state = reducer(state, msg({ type: "edits", items: [makeEdit({ id: "c" })] }));
     state = reducer(
       state,
