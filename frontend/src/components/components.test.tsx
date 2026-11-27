@@ -196,3 +196,37 @@ describe("TopPages", () => {
     expect(screen.getByText("9")).toBeInTheDocument();
   });
 });
+
+describe("Loading placeholders", () => {
+  const ai = { enabled: false, model: null };
+
+  it("show while the first data is on its way, instead of empty-state text", () => {
+    render(
+      <>
+        <TopPages pages={[]} windowSeconds={300} loading />
+        <FlaggedEdits edits={[]} ai={ai} loading />
+      </>,
+    );
+    expect(screen.getByRole("status", { name: "Loading most edited pages" })).toBeInTheDocument();
+    expect(screen.getByRole("status", { name: "Loading flagged edits" })).toBeInTheDocument();
+    expect(screen.queryByText("No edits yet.")).toBeNull();
+    expect(screen.queryByText("Nothing suspicious so far.")).toBeNull();
+  });
+
+  it("give way to the real empty states once data has arrived", () => {
+    render(
+      <>
+        <TopPages pages={[]} windowSeconds={300} />
+        <FlaggedEdits edits={[]} ai={ai} />
+      </>,
+    );
+    expect(screen.queryByRole("status")).toBeNull();
+    expect(screen.getByText("No edits yet.")).toBeInTheDocument();
+    expect(screen.getByText("Nothing suspicious so far.")).toBeInTheDocument();
+  });
+
+  it("stand in for an empty live feed", () => {
+    render(<LiveFeed edits={[]} paused pendingCount={0} onTogglePause={() => {}} />);
+    expect(screen.getByRole("status", { name: "Loading edits" })).toBeInTheDocument();
+  });
+});

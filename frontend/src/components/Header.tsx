@@ -138,7 +138,7 @@ const Kpis = memo(function Kpis({ snapshot, flaggedCount }: { snapshot: Snapshot
       <Kpi label={`Last ${windowMin} min`} value={snapshot?.edits_in_window} />
       <Kpi label="By bots" value={snapshot ? snapshot.bot_share * 100 : undefined} suffix="%" />
       <Kpi label="Wikis active" value={snapshot?.wikis.length} />
-      <Kpi label="Flagged" value={flaggedCount} alert={flaggedCount > 0} bumpOnRise />
+      <Kpi label="Flagged" value={snapshot ? flaggedCount : undefined} alert={flaggedCount > 0} bumpOnRise />
     </div>
   );
 });
@@ -164,7 +164,7 @@ function Kpi({ label, value, suffix = "", alert = false, bumpOnRise = false }: K
   }, [value, bumpOnRise]);
   return (
     <div key={bump} className={`kpi ${alert ? "kpi-alert" : ""} ${bump ? "kpi-bump" : ""}`}>
-      <span className="kpi-value">{value === undefined ? "—" : `${formatNumber(Math.round(animated))}${suffix}`}</span>
+      <span className="kpi-value">{value === undefined ? <span className="skeleton-bar kpi-skeleton" aria-hidden="true" /> : `${formatNumber(Math.round(animated))}${suffix}`}</span>
       <span className="kpi-label">{label}</span>
     </div>
   );

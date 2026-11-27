@@ -5,6 +5,10 @@ edits per minute, the most-edited pages in the last 5 minutes and a live feed
 you can filter by wiki. AI explains what is trending (**Pulse**) and flags
 edits that look like vandalism, each with a short reason.
 
+**Live demo:** https://wikipulse-91ap.onrender.com (login details are shared
+separately). It runs on Render's free plan, so the first visit after a quiet
+spell can take up to a minute while the server wakes up.
+
 ![WikiPulse dashboard](docs/dashboard.png)
 
 **Stack:** Python 3.9+ / FastAPI back end, React 19 + TypeScript dashboard,
@@ -82,7 +86,7 @@ npm run e2e        # or npm run e2e:open for the Cypress app
 | Extra: login | `backend/app/auth.py`, `LoginPage.tsx`, `useAuth.ts` | One account from `.env`; signed HttpOnly SameSite=Strict session cookie; `/api` and `/ws` closed without it; failed logins throttled |
 | Extra: AI assistant | `backend/app/ai/assistant.py`, `AssistantChat.tsx`, `useAssistant.ts` | Chat panel ("Ask AI") that streams answers ChatGPT-style (NDJSON over fetch, Stop button) from the live dashboard data, in the user's language; declines questions that are not about the dashboard in one line; public text sent as escaped JSON; has its own hourly limit (30 calls, so background vandalism review cannot starve it) and shares the daily budget; falls back to answers from the numbers when AI is unavailable |
 | Extra: guided tour | `frontend/src/features/tour/` | 15-step walkthrough that spotlights each section on first sign-in; replay from the **?** button; keyboard (arrows / Esc) and mobile bottom-sheet support |
-| Tests | `backend/tests`, `frontend/src/**/*.test.*`, `frontend/cypress/e2e` | 231 back end, 78 front end, 29 end-to-end |
+| Tests | `backend/tests`, `frontend/src/**/*.test.*`, `frontend/cypress/e2e` | 231 back end, 81 front end, 29 end-to-end |
 | Optional: Docker | `docker-compose.yml` | nginx serves the dashboard and proxies `/api` and `/ws` |
 | Optional: deployed demo | `Dockerfile`, `render.yaml` | One Render web service; the back end serves the built dashboard |
 | Optional: E2E UI test | `frontend/cypress/e2e/*.cy.ts` | Cypress (reason below) |

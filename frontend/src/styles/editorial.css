@@ -724,3 +724,72 @@ body {
     animation: none;
   }
 }
+
+/* ---------------------------------------------------------------- loading
+   Shown until the first snapshot arrives (cold start, slow network). */
+.skeleton {
+  display: grid;
+  gap: 14px;
+  padding: 6px 0;
+}
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.skeleton-caption {
+  margin: 4px 0 0;
+}
+.skeleton-bar,
+.board.is-loading .chart-wrap,
+.board.is-loading .segbar {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--radius);
+}
+.skeleton-bar {
+  display: block;
+  height: 12px;
+}
+.skeleton-lines .skeleton-row:first-child .skeleton-bar {
+  height: 18px; /* a headline above the body text */
+}
+.skeleton-list .skeleton-bar:first-child {
+  flex: 0 1 auto;
+}
+.skeleton-tag {
+  width: 44px;
+  margin-left: auto;
+  flex: none;
+}
+.kpi-skeleton {
+  width: 48px;
+  height: 22px;
+  margin: 4px 0 6px;
+}
+/* Charts keep their size; the empty axes are hidden under a shimmer. */
+.board.is-loading .chart-wrap > *,
+.board.is-loading .segbar > *,
+.board.is-loading .card-head .legend,
+.board.is-loading .legend-stacked {
+  visibility: hidden;
+}
+.board.is-loading .segbar {
+  min-height: 40px;
+}
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-bar,
+  .board.is-loading .chart-wrap,
+  .board.is-loading .segbar {
+    animation: none;
+  }
+}
