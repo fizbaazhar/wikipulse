@@ -793,3 +793,13 @@ body {
     animation: none;
   }
 }
+
+/* The AI's quote from the diff, set like a pull quote. */
+.flagged-evidence bdi {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+}
+.flagged-evidence-label {
+  font-weight: 700;
+}

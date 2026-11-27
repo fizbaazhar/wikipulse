@@ -15,6 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .ai.assistant import Assistant
 from .ai.budget import DailyBudget
+from .ai.diffs import DiffFetcher
 from .ai.llm import AnthropicLLM, AzureOpenAILLM, LLMClient, OpenAILLM, RateLimiter
 from .ai.moderator import Moderator
 from .ai.pulse import PulseService
@@ -103,7 +104,11 @@ def create_app(
         limiter = RateLimiter(settings.llm_max_calls_per_hour)
         chat_limiter = RateLimiter(settings.llm_assistant_calls_per_hour)
         stats = RollingStats(settings.window_seconds, settings.history_minutes)
-        moderator = Moderator(model, limiter, batch_size=settings.review_batch_size, interval=settings.review_interval)
+        # The diff is only for the AI review, so it is fetched only when AI is on.
+        diffs = DiffFetcher(settings.user_agent) if model is not None and settings.fetch_diffs else None
+        moderator = Moderator(
+            model, limiter, diffs=diffs, batch_size=settings.review_batch_size, interval=settings.review_interval
+        )
         pulse = PulseService(
             stats, model, limiter,
             flagged_count=lambda: sum(1 for f in moderator.recent_flagged() if f["flag"]["status"] == "flagged"),
@@ -135,6 +140,8 @@ def create_app(
             for task in tasks:
                 task.cancel()
             await asyncio.gather(*tasks, return_exceptions=True)
+            if diffs is not None:
+                await diffs.aclose()
 
     # With login on, the API docs are hidden too: they list every route.
     docs = {} if not auth.enabled else {"docs_url": None, "redoc_url": None, "openapi_url": None}

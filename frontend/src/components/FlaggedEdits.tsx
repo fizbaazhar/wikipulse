@@ -98,6 +98,11 @@ function FlagItem({ edit: e, compact = false }: { edit: Edit & { flag: Flag }; c
         <bdi>{e.title}</bdi>
       </a>
       <p className="flagged-reason">{e.flag.reason}</p>
+      {e.flag.evidence && (
+        <p className="flagged-evidence">
+          <span className="flagged-evidence-label">In the edit:</span> <bdi>“{e.flag.evidence}”</bdi>
+        </p>
+      )}
       <p className="muted small">
         by <bdi>{e.user}</bdi>
         {e.flag.ai_confidence !== null && ` · AI confidence ${Math.round(e.flag.ai_confidence * 100)}%`}

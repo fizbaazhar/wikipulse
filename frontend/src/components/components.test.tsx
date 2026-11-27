@@ -115,6 +115,23 @@ describe("FlaggedEdits", () => {
     expect(screen.getByText("AI")).toBeInTheDocument();
   });
 
+  it("shows the AI's quote from the edit as text, and nothing when there is none", () => {
+    const quote = '<img src=x onerror="alert(1)"> nobody cares';
+    const { container } = render(
+      <FlaggedEdits
+        edits={[
+          makeEdit({ id: "q", flag: makeFlag({ source: "ai", evidence: quote }) }),
+          makeEdit({ id: "n", flag: makeFlag({ source: "rules" }) }),
+        ]}
+        ai={{ enabled: true, model: "m" }}
+      />,
+    );
+    const shown = container.querySelectorAll(".flagged-evidence");
+    expect(shown).toHaveLength(1);
+    expect(shown[0]).toHaveTextContent(`In the edit: “${quote}”`);
+    expect(container.querySelector("img")).toBeNull();
+  });
+
   it("puts open flags first and tucks cleared ones into a collapsed group", () => {
     const { container } = render(
       <FlaggedEdits

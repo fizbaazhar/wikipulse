@@ -57,8 +57,8 @@ _PANELS = (
      "arrives, and Pause to stop again."),
     (("vandalism panel", "possible vandalism", "vandalism", "flagged"),
      "Possible vandalism lists edits that look suspicious, each with a reason. Rules catch them first, then AI "
-     "reviews them and marks them likely (red), suspicious (amber) or cleared. The counts at the top of the panel "
-     "add them up."),
+     "reads what each edit actually changed (its diff) and marks it likely (red), suspicious (amber) or cleared. "
+     "An AI flag must quote the edit, and that quote is shown under it. The counts at the top add them up."),
     (("edits per minute chart", "per minute chart", "edits per minute"),
      "Edits per minute compares the busiest wikis minute by minute over the last 30 minutes. Hover it for exact numbers."),
     (("edit size", "sizes", "bytes"),

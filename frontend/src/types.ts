@@ -10,6 +10,8 @@ export interface Flag {
   source: "rules" | "ai";
   ai_confidence: number | null;
   note: string | null;
+  /** The AI's quote from the edit's diff, checked on the server to be in it. */
+  evidence?: string | null;
 }
 
 export interface Edit {
