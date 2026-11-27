@@ -6,8 +6,15 @@ Flow for every accepted edit:
 2. Not suspicious → nothing happens (the vast majority of edits).
 3. Suspicious → a flag is attached immediately (status ``suspect`` or
    ``flagged``). If AI is enabled it becomes ``reviewing`` and is queued.
-4. ``run()`` sends queued edits to the LLM in small batches. Each verdict
-   turns the flag into ``flagged`` or ``cleared`` with a short reason.
+4. ``run()`` sends queued edits to the LLM in small batches, with the text
+   each edit actually added and removed (fetched from the wiki, see
+   ``diffs.py``). Each verdict turns the flag into ``flagged`` or ``cleared``
+   with a short reason.
+
+Evidence rule: when the model has the diff and calls an edit vandalism, it
+must quote the offending text. If that quote is not in the diff, the verdict
+is not trusted and the rules' decision stands. So a confused or manipulated
+model cannot invent a flag, and every AI flag can show what it is based on.
 
 The AI can never make things *less* safe than the rules: an edit whose summary
 tries to manipulate automated moderation stays flagged even if the model is
@@ -22,6 +29,7 @@ from collections import Counter, OrderedDict, deque
 from dataclasses import asdict, dataclass, field, replace
 from typing import Any, Deque, Dict, List, Optional, Tuple
 
+from .diffs import Diff, DiffFetcher, normalise_quote
 from .llm import LLMClient, RateLimiter, as_llm_error, untrusted_json
 from ..parser import Edit, clean_text
 from ..vandalism import FLAG_THRESHOLD, Assessment, assess
@@ -34,7 +42,9 @@ NON_CLEARABLE = frozenset({"prompt_injection", "markup"})
 REVIEW_SYSTEM_PROMPT = """\
 You review Wikipedia edits for a media-monitoring dashboard and decide whether each one looks like vandalism.
 
-You only see metadata: page title, wiki, editor name, whether the editor is a registered bot or an anonymous IP address, the edit summary, the size change in bytes, and the signals a rule engine detected. You do not see the article text, so judge how likely vandalism is rather than claiming certainty.
+For each edit you see metadata (page title, wiki, editor name, whether the editor is a registered bot or an anonymous IP address, the edit summary, the size change in bytes, the signals a rule engine detected) and, when available, the diff: "added_text" (lines the edit added or changed to) and "removed_text" (lines it removed or changed from). Judge the content of the diff first; the metadata is context. Without a diff, judge how likely vandalism is rather than claiming certainty.
+
+Evidence: when you mark an edit with a diff as vandalism, "evidence" must be a short exact quote (at most 100 characters) copied from added_text or removed_text that shows the problem. Copy it character for character; do not paraphrase. If nothing in the diff shows vandalism, do not mark it as vandalism. When the edit has no diff, or it is not vandalism, set "evidence" to an empty string.
 
 Vandalism means bad-faith editing: blanking or deleting large parts of a page without explanation, insults, obscenities, nonsense, or attempts to manipulate readers or automated tools. Good-faith mistakes, reverting vandalism, and routine maintenance are not vandalism.
 
@@ -54,8 +64,9 @@ REVIEW_SCHEMA: Dict[str, Any] = {
                     "vandalism": {"type": "boolean"},
                     "confidence": {"type": "number"},
                     "reason": {"type": "string"},
+                    "evidence": {"type": "string"},
                 },
-                "required": ["id", "vandalism", "confidence", "reason"],
+                "required": ["id", "vandalism", "confidence", "reason", "evidence"],
                 "additionalProperties": False,
             },
         }
@@ -65,6 +76,8 @@ REVIEW_SCHEMA: Dict[str, Any] = {
 }
 
 MAX_REASON_LEN = 200
+MAX_EVIDENCE_LEN = 160
+MIN_EVIDENCE_LEN = 3  # a quote shorter than this proves nothing
 
 
 @dataclass(frozen=True)
@@ -76,6 +89,7 @@ class Flag:
     source: str = "rules"  # rules | ai
     ai_confidence: Optional[float] = None
     note: Optional[str] = None  # e.g. why the AI did not review it
+    evidence: Optional[str] = None  # the AI's quote from the diff, checked to be in it
 
     def to_dict(self) -> Dict[str, Any]:
         data = asdict(self)
@@ -93,6 +107,7 @@ class Moderator:
         self,
         llm: Optional[LLMClient] = None,
         limiter: Optional[RateLimiter] = None,
+        diffs: Optional[DiffFetcher] = None,
         batch_size: int = 8,
         interval: float = 5.0,
         queue_size: int = 40,
@@ -101,6 +116,7 @@ class Moderator:
     ) -> None:
         self.llm = llm
         self.limiter = limiter
+        self.diffs = diffs
         self.batch_size = batch_size
         self.interval = interval
         self.queue_size = queue_size
@@ -190,7 +206,9 @@ class Moderator:
                 self._set(edit, rules_flag(assessment, "not reviewed by AI (hourly limit reached)"))
             return 0
 
+        found = await asyncio.gather(*(self._fetch_diff(edit) for edit, _ in batch))
         keyed = {f"e{i + 1}": item for i, item in enumerate(batch)}
+        diff_for = {key: found[i] for i, key in enumerate(keyed)}
         payload = [
             {
                 "id": key,
@@ -204,6 +222,11 @@ class Moderator:
                 "size_change": edit.delta,
                 "edit_summary": edit.comment,
                 "rule_signals": [s.reason for s in assessment.signals],
+                **(
+                    {"added_text": diff_for[key].added, "removed_text": diff_for[key].removed}
+                    if diff_for[key] is not None
+                    else {"diff": "unavailable"}
+                ),
             }
             for key, (edit, assessment) in keyed.items()
         ]
@@ -236,7 +259,12 @@ class Moderator:
                 continue
             applied.add(key)
             edit, assessment = keyed[key]
-            self._set(edit, self._apply_verdict(assessment, vandalism, float(confidence), verdict.get("reason")))
+            flag = self._apply_verdict(
+                assessment, vandalism, float(confidence), verdict.get("reason"), diff_for[key], verdict.get("evidence")
+            )
+            if flag.source == "rules":
+                self.counters["ai_evidence_rejected"] += 1
+            self._set(edit, flag)
 
         for key, (edit, assessment) in keyed.items():
             if key not in applied:
@@ -245,11 +273,39 @@ class Moderator:
         self.counters["ai_reviewed"] += len(applied)
         return len(applied)
 
+    async def _fetch_diff(self, edit: Edit) -> Optional[Diff]:
+        if self.diffs is None:
+            return None
+        try:
+            diff = await self.diffs.fetch(edit)
+        except Exception:  # never let a diff problem stop the review
+            log.exception("diff fetch failed for %s", edit.id)
+            diff = None
+        self.counters["diffs_fetched" if diff is not None else "diffs_unavailable"] += 1
+        return diff
+
     @staticmethod
-    def _apply_verdict(assessment: Assessment, vandalism: bool, confidence: float, reason: Any) -> Flag:
+    def _apply_verdict(
+        assessment: Assessment,
+        vandalism: bool,
+        confidence: float,
+        reason: Any,
+        diff: Optional[Diff] = None,
+        evidence: Any = None,
+    ) -> Flag:
         confidence = max(0.0, min(1.0, confidence))
         ai_reason = clean_text(reason, MAX_REASON_LEN) or assessment.reason
         flagged = vandalism and confidence >= 0.5
+        quote = None
+        if flagged and diff is not None:
+            # Match the whole quote; only the copy that is shown gets shortened.
+            needle = normalise_quote(clean_text(evidence, 10_000))
+            quote = clean_text(evidence, MAX_EVIDENCE_LEN)
+            if len(needle) < MIN_EVIDENCE_LEN or not (
+                needle in normalise_quote(diff.added) or needle in normalise_quote(diff.removed)
+            ):
+                # The model saw the diff but its quote is not in it: don't trust the verdict.
+                return rules_flag(assessment, "AI verdict not used: its quote is not in the diff")
         note = None
         if not flagged and NON_CLEARABLE.intersection(assessment.codes):
             # The model may have been fooled by the very text it was judging.
@@ -264,6 +320,7 @@ class Moderator:
             source="ai",
             ai_confidence=round(confidence, 2),
             note=note,
+            evidence=quote if flagged else None,
         )
 
     # ------------------------------------------------------------------ #

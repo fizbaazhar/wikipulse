@@ -66,3 +66,17 @@
   font-size: 12px;
   overflow-wrap: anywhere;
 }
+/* The AI's quote from the diff: what the flag is based on. */
+.flagged-evidence {
+  margin-top: 4px;
+  color: var(--text);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.flagged-evidence-label {
+  color: var(--danger);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}

@@ -78,6 +78,9 @@ class Settings:
     cookie_secure: bool = False  # set true when served over HTTPS
     # Built dashboard to serve from the back end (single-service deploys); None = don't.
     static_dir: Optional[Path] = None
+    # Fetch each suspicious edit's diff from the wiki for the AI review. On in
+    # the app (from_env); off by default here so tests never touch the network.
+    fetch_diffs: bool = False
 
     @property
     def ai_problem(self) -> Optional[str]:
@@ -151,4 +154,5 @@ class Settings:
             session_hours=float(env.get("WIKIPULSE_SESSION_HOURS", "12")),
             cookie_secure=_bool(env.get("WIKIPULSE_COOKIE_SECURE", "false")),
             static_dir=Path(env["WIKIPULSE_STATIC_DIR"]) if env.get("WIKIPULSE_STATIC_DIR") else None,
+            fetch_diffs=_bool(env.get("WIKIPULSE_FETCH_DIFFS", "true")),
         )

@@ -78,11 +78,11 @@ npm run e2e        # or npm run e2e:open for the Cypress app
 | Top 10 pages in the last 5 minutes | `TopPages.tsx` | Per wiki, follows the filter |
 | Live feed with a filter by wiki | `LiveFeed.tsx`, `Header.tsx` | Filter is applied on the server to every panel. Edits trickle in smoothly, the feed holds while you hover, and can be paused |
 | Pulse summary (AI) | `backend/app/ai/pulse.py`, `PulseCard.tsx` | Rule-based fallback; AI only when trending changes |
-| Vandalism flag with a reason (AI) | `vandalism.py`, `ai/moderator.py`, `FlaggedEdits.tsx` | Rules first, AI second opinion |
+| Vandalism flag with a reason (AI) | `vandalism.py`, `ai/moderator.py`, `ai/diffs.py`, `FlaggedEdits.tsx` | Rules first, then an AI second opinion on the edit's real diff; an AI flag must quote the diff |
 | Extra: login | `backend/app/auth.py`, `LoginPage.tsx`, `useAuth.ts` | One account from `.env`; signed HttpOnly SameSite=Strict session cookie; `/api` and `/ws` closed without it; failed logins throttled |
 | Extra: AI assistant | `backend/app/ai/assistant.py`, `AssistantChat.tsx`, `useAssistant.ts` | Chat panel ("Ask AI") that streams answers ChatGPT-style (NDJSON over fetch, Stop button) from the live dashboard data, in the user's language; declines questions that are not about the dashboard in one line; public text sent as escaped JSON; has its own hourly limit (30 calls, so background vandalism review cannot starve it) and shares the daily budget; falls back to answers from the numbers when AI is unavailable |
 | Extra: guided tour | `frontend/src/features/tour/` | 15-step walkthrough that spotlights each section on first sign-in; replay from the **?** button; keyboard (arrows / Esc) and mobile bottom-sheet support |
-| Tests | `backend/tests`, `frontend/src/**/*.test.*`, `frontend/cypress/e2e` | 231 back end, 71 front end, 29 end-to-end |
+| Tests | `backend/tests`, `frontend/src/**/*.test.*`, `frontend/cypress/e2e` | 265 back end, 72 front end, 29 end-to-end |
 | Optional: Docker | `docker-compose.yml` | nginx serves the dashboard and proxies `/api` and `/ws` |
 | Optional: deployed demo | `Dockerfile`, `render.yaml` | One Render web service; the back end serves the built dashboard |
 | Optional: E2E UI test | `frontend/cypress/e2e/*.cy.ts` | Cypress (reason below) |
@@ -131,7 +131,8 @@ backend/
     ai/
       llm.py            Azure OpenAI / OpenAI / Claude clients, hourly rate limiter
       budget.py         daily dollar limit (reserves worst case, records real cost)
-      moderator.py      flags + batched AI verdicts
+      moderator.py      flags + batched AI verdicts, evidence check against the diff
+      diffs.py          fetches an edit's diff from the wiki (Wikimedia hosts only)
       pulse.py          trending summary
       assistant.py      chat answers from the live data, streamed
     api/
@@ -182,9 +183,11 @@ every edit ──> rules (free, instant) ──> not suspicious (≈99%) ──>
                      │
                      └─> suspicious ──> shown at once as "Suspicious" / "Likely vandalism"
                                           │
-                              AI on? ──> queued ──> batch of ≤8 to the LLM
+                              AI on? ──> queued ──> fetch each edit's diff from the wiki
                                                        │
-                                     verdict ──> "Likely vandalism" / "Cleared" + reason
+                                            batch of ≤8 to the LLM (metadata + diff)
+                                                       │
+                                     verdict ──> "Likely vandalism" + quote / "Cleared" + reason
 ```
 
 - **Rules** (`vandalism.py`) look at blanking and large removals, edit
@@ -192,8 +195,18 @@ every edit ──> rules (free, instant) ──> not suspicious (≈99%) ──>
   bots, and logged-out editors (IP addresses or `~2026-…` temporary accounts).
 - **AI review** (`moderator.py`) only sees edits the rules found suspicious, so
   cost grows with suspicious edits, not with stream volume.
-- **The stream has no diff text**, only metadata and the edit summary, so both
-  layers judge likelihood. The reason shown says what the decision was based on.
+- **The diff** (`diffs.py`): the stream has no article text, so for each
+  suspicious edit the back end asks that wiki's API (`action=compare`) for the
+  lines the edit added and removed, and sends them to the AI with the metadata.
+  Requests only go to Wikimedia hosts over HTTPS (the link comes from stream
+  data, so anything else is refused), with a short timeout and size caps.
+- **Evidence rule:** when the AI saw the diff and says "vandalism", it must
+  quote the offending text. The server checks the quote is really in the diff
+  (ignoring case and spacing). If it is not, the verdict is dropped and the
+  rules' decision stands, so a confused or manipulated model cannot invent a
+  flag. Accepted quotes are shown under the flag ("In the edit: …").
+- **No diff** (a new page, a fetch error): the AI judges metadata as before,
+  and the reason says what the decision was based on.
 
 Running against the live stream showed false positives, which I fixed with tests:
 
@@ -350,23 +363,21 @@ tests headless, so `make e2e` is a single command locally or in CI.
 
 ## What I would do with more time
 
-1. **Fetch the diff for suspicious edits** (MediaWiki compare API) and give it to
-   the AI. That is the biggest accuracy gain. Today it only sees metadata.
-2. **Evaluate the vandalism flags** against edits that were later reverted
+1. **Evaluate the vandalism flags** against edits that were later reverted
    (revert tags in the stream) to measure precision/recall and tune thresholds.
-3. **Persistence:** Redis or Postgres for history across restarts and trends
+2. **Persistence:** Redis or Postgres for history across restarts and trends
    over hours or days ("what is unusually active compared to normal?").
-4. **Spike detection:** compare each page's rate with its own baseline instead
+3. **Spike detection:** compare each page's rate with its own baseline instead
    of raw counts, so a burst on a quiet page stands out.
-5. **Scale out:** split ingestion from the API (the brief's optional Go service
+4. **Scale out:** split ingestion from the API (the brief's optional Go service
    fits here) with a queue between them, so several API instances can serve
    clients.
-6. **Pulse per wiki**, cached per filter, plus links from the summary to the pages.
-7. CI pipeline running `make test` and `make e2e` on every pull request.
+5. **Pulse per wiki**, cached per filter, plus links from the summary to the pages.
+6. CI pipeline running `make test` and `make e2e` on every pull request.
 
 ## Known limitations
 
-- Vandalism decisions are based on metadata and the edit summary only.
+- The rules see only metadata and the edit summary; only the AI review reads the diff, and new pages have none.
 - Bot share and counts reset on restart (in-memory by design).
 - The AI path has been tested with a fake model and a mocked HTTP API, not
   yet with a live key.
@@ -401,6 +412,7 @@ All settings are environment variables (or `backend/.env`):
 | `WIKIPULSE_LLM_FALLBACKS` | `true` | Claude only: retry on a fallback model if a safety classifier declines |
 | `WIKIPULSE_PULSE_INTERVAL` | `60` | Seconds between Pulse checks (calls only if trending changed) |
 | `WIKIPULSE_REVIEW_INTERVAL` | `5` | Seconds between vandalism review batches |
+| `WIKIPULSE_FETCH_DIFFS` | `true` | Fetch each suspicious edit's diff from the wiki for the AI review |
 | `WIKIPULSE_AUTH_USERNAME` | `admin` | Login username |
 | `WIKIPULSE_AUTH_PASSWORD` | _(empty)_ | Login password. Empty = login off |
 | `WIKIPULSE_SESSION_SECRET` | _(random per start)_ | Signs session cookies; set it so sessions survive restarts |
